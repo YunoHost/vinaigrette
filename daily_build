@@ -1,0 +1,151 @@
+#!/bin/bash
+
+# Global and environment variables
+source /home/vinaigrette/config
+export DEBSIGN_KEYID
+export DEBFULLNAME
+export DEBEMAIL
+
+# Default options values
+## Either building source in a chroot env or not
+BUILD_SRC_LOCALLY=false
+## Either force package build if there is no update or not
+FORCE=false
+## Final version of the package
+VERSION="$(date +%Y.%m.%d)+$(date +%H%M)"
+## Repository branch to checkout
+BRANCH=unstable
+
+# Global and environment variables
+DISTRIBUTION="unstable"
+CODENAME="jessie"
+
+
+usage()
+{
+cat << EOF
+Usage: `basename $0` [options]
+
+OPTIONS:
+  -p PACKAGE  Package name to build
+  -v VERSION  Package version to set (default: $VERSION)
+  -b BRANCH   Branch to use (default: $BRANCH)
+  -f          Force package building
+  -l          Build sources locally
+  -h          Print this help
+EOF
+exit
+}
+
+# Parse options
+while getopts ":fhlb:v:p:" option; do
+    case $option in
+        f)
+            FORCE=true
+            ;;
+        l)
+            BUILD_SRC_LOCALLY=true
+            ;;
+        v)
+            VERSION=$OPTARG
+            ;;
+        b)
+            BRANCH=$OPTARG
+            ;;
+        p)
+            REQUIRED_PACKAGE=$OPTARG
+            ;;
+        h)
+            usage
+            ;;
+        :)
+            echo "Option -$OPTARG requires an argument"
+            exit 1
+            ;;
+        \?)
+            echo "-$OPTARG: invalid option"
+            exit 1
+            ;;
+    esac
+done
+
+cd $DAILY_PACKAGES
+
+# Find packages to build
+if [ -n "$REQUIRED_PACKAGE" ]; then
+    NEW_PACKAGES=$REQUIRED_PACKAGE
+else
+    NEW_PACKAGES=$(find . -maxdepth 1 -mindepth 1 -type d  | cut -d '/' -f2 | grep -v SSOwat | sort)
+    if [ ! -n "$NEW_PACKAGES" ]; then
+        exit 1
+    fi 
+fi
+
+PKG_TO_BUILD=0
+
+for package in $NEW_PACKAGES; do
+    cd $DAILY_PACKAGES/$package
+
+    echo "---------------------------------------------"
+    echo "Selected package: ${package}"
+
+    # Fetch and update package from origin
+    echo "Looking for changes from git..."
+    git fetch origin
+    git checkout $BRANCH
+    if ! $FORCE && [ -z "$(git log $BRANCH..origin/$BRANCH)" ]; then
+        echo "Local sources already up-to-date"
+        continue
+    fi
+    git pull origin $BRANCH
+
+    echo "Updating changelog to version ${VERSION}"
+    rm -f debian/changelog.dch
+    cp debian/changelog debian/changelog.old
+    dch --package $package -v "${VERSION}" -D ${DISTRIBUTION} --force-distribution "Daily build." -b > /dev/null 2>&1
+
+    changes_file=${DAILY_PACKAGES}/${package}_${VERSION}_source.changes
+
+    echo "Building source package of ${package}_${VERSION}..."
+    if $BUILD_SRC_LOCALLY; then
+        debuild -S -sa > /dev/null
+    else
+        sudo pbuilder execute --bindmounts ${DAILY_PACKAGES} --basetgz /var/cache/pbuilder/images/amd64/${CODENAME}.tgz -- /usr/local/bin/pbuilder/build-sources ${DAILY_PACKAGES}/${package}
+    fi
+    if [ $? -ne 0 ] || [ ! -f ${changes_file} ]; then
+        echo "An error occured while building source package ${package}"
+        exit 1
+    fi
+
+    echo "Adding ${package}_${VERSION} to ${CODENAME}/${DISTRIBUTION}..."
+#    /usr/local/bin/repo/move-to-incoming "../${package}_${VERSION}_source.changes"
+    /usr/local/bin/repo/include-changes $CODENAME $DISTRIBUTION $changes_file
+    RET=$?
+
+    # Do not save in changelog
+    cp debian/changelog.old debian/changelog
+    rm debian/changelog.old
+
+    if [ $RET -ne 0 ]; then
+        echo "An error occured while building source package ${package}"
+    else
+        PKG_TO_BUILD+=1
+    fi
+done
+
+if [ $PKG_TO_BUILD -eq 0 ]; then
+    echo "Nothing to build"
+    exit 1
+fi
+
+#echo "Process incoming in repository..."
+#sudo reprepro -C $DISTRIBUTION -V -b $REPO_DIR processincoming yunohost
+#if [ $? -ne 0 ]; then
+#    echo "An error occured while processing incoming"
+#    exit 1
+#fi
+
+#echo "Update packages local database..."
+#sudo apt-get update > /dev/null 1>&1
+
+echo "Build will start soon. See http://rebuild.yunohost.org"

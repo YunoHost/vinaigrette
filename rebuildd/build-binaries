@@ -1,0 +1,64 @@
+#!/bin/bash
+
+codename=$1
+package=$2
+version=$3
+arch=$4
+
+source /home/vinaigrette/repo/config
+source /home/vinaigrette/package_helpers.sh
+
+# Build only binary-only limited to architecture dependent packages
+DEBBUILDOPTS="-B"
+
+if [[ $arch == $DEFAULT_ARCH ]]; then
+    # Build architecture independent packages too
+    DEBBUILDOPTS="-b"
+elif [[ $arch == all ]]; then
+    # Build architecture independent packages too on default arch
+    arch=$DEFAULT_ARCH
+    DEBBUILDOPTS="-b"
+fi
+
+# Retrieve the number of processors
+if [ -x /usr/bin/getconf ]; then
+    JOBS=`getconf _NPROCESSORS_CONF`
+else
+    JOBS=1
+fi
+
+echo \
+"******************************************************************************"
+echo "Starting building..."
+
+# Format needed pbuilder arguments
+DEBBUILDOPTS="$DEBBUILDOPTS -j$JOBS"
+DSC_FILE="${package}_${version}.dsc"
+BASE_TGZ="/var/cache/pbuilder/images/${arch}/${codename}.tgz"
+EXTRA_OPTS=()
+
+# Use specific conf for nodejs builds
+if [[ $package =~ ^yunohost-admin$ ]]; then
+    base_tgz="/var/cache/pbuilder/images/${arch}/${codename}-nodejs.tgz"
+    if [[ -f ${base_tgz} ]]; then
+        echo "+ using nodejs environment..."
+	BASE_TGZ=${base_tgz}
+    fi
+fi
+
+case $arch in
+  armhf)
+    pbuilder build --debbuildopts "${DEBBUILDOPTS}" \
+        --configfile /etc/pbuilder/rc.d/armhf \
+        --basetgz $BASE_TGZ "${EXTRA_OPTS[@]}" $DSC_FILE
+    exit_code=$?
+    ;;
+
+  amd64|i386)
+    pbuilder build --debbuildopts "${DEBBUILDOPTS}" \
+        --basetgz $BASE_TGZ "${EXTRA_OPTS[@]}" $DSC_FILE
+    exit_code=$?
+    ;;
+esac
+
+exit $exit_code

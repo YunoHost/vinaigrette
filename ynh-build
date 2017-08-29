@@ -1,0 +1,105 @@
+#!/bin/bash
+
+source /home/vinaigrette/config
+
+# ##### #
+# Usage #
+# ##### #
+
+usage() {
+    echo "
+Usage:
+  `basename $0` <project> <branch> <version>
+
+Arguments:
+  <project>     moulinette, yunohost, yunohost-admin or SSOwat
+  <branch>      testing or stable
+  <distrib>     jessie or stretch
+  <version>     x.y.z (ex: 2.6.1)
+"
+}
+
+if [[ $1 == "-h" ]]; then
+    usage
+    exit 0
+fi
+
+# ################# #
+# Check user inputs #
+# ################# #
+
+## Project
+if [[ $1 =~ ^yunohost|yunohost-admin|moulinette|SSOwat$ ]]; then
+    PROJECT=$1
+else
+    echo "Invalid project $1"
+    usage
+    exit 1
+fi
+
+## Branch
+if [[ $2 =~ ^testing|stable$ ]]; then
+    BRANCH=$2
+else
+    echo "Invalid branch $2"
+    usage
+    exit 2
+fi
+
+# Distribution 
+if [[ $3 =~ ^jessie|stretch$ ]]; then
+    DISTRIB=$3
+else
+    echo "Invalid distribution $3"
+    usage
+    exit 3
+fi
+
+# Version
+VERSION=$4
+echo $VERSION
+if [ -z "$VERSION" ]; then
+    echo "Invalid version $VERSION"
+    usage
+    exit 4
+fi
+
+# Sum up configuration
+echo "## #################################################### ##"
+echo "## Building $PROJECT $BRANCH release - $VERSION version"
+echo "## #################################################### ##"
+
+# Update project's repository
+echo ""
+echo "## Updating $GIT_REPOS/$PROJECT repository ..."
+cd $GIT_REPOS/$PROJECT
+git fetch --quiet
+git fetch --tags --quiet
+git checkout $BRANCH --quiet
+git pull origin $BRANCH --quiet
+
+# Check if tag really exists
+if git rev-parse "debian/$VERSION" >/dev/null 2>&1; then
+    TAG="debian/$VERSION"
+else
+    echo "Invalid version $VERSION (there's no debian/$VERSION tag in the git repo !)"
+    usage
+    exit
+fi
+
+
+# Create temporary folder
+TMP_FOLDER=$(mktemp -d)
+
+# Extract git archive a desired tag
+echo ""
+echo "## Exporting in $TMP_FOLDER ..."
+git archive $TAG --format=tar | tar -x -C $TMP_FOLDER
+
+# Build Debian package
+echo ""
+echo "## Building Debian package ..."
+echo ""
+cd $TMP_FOLDER
+$BUILD_DEB -d $BRANCH -c $DISTRIB .
+

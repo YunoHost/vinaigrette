@@ -1,0 +1,46 @@
+#!/bin/bash
+
+action=$1
+codename=$2
+package=$3
+version=$4
+changes_file=$5
+
+source /usr/local/lib/helpers/debian/package.sh
+
+MAIL="rebuildd@yunohost.org"
+ 
+# Only care about packages being added
+if [[ $action != accepted ]]; then
+    exit 1
+fi
+
+# Only care about source packages
+arch=$(get_architecture $changes_file)
+if [[ $arch != source ]]; then
+    exit 0
+fi
+
+# Retrieve the .dsc file
+dsc_file=$(dirname ${changes_file})/${package}_${version}.dsc
+if [ ! -f $dsc_file ]; then
+    echo "Unable to find the .dsc file"
+    exit 1
+fi
+
+# Retrieve architecture from the .dsc
+arch=$(awk '/^Architecture: / {print $2}' ${dsc_file})
+if [[ $arch =~ -?any ]]; then
+    source /etc/default/rebuildd
+
+    # Add all architectures supported by rebuildd
+    arch=$ARCHS
+fi
+
+# Kick off the job
+for a in $arch; do
+    # package_name package_version priority dist_name arch mail
+    echo "$package $version 1 $codename $a $MAIL" | sudo rebuildd-job add
+done
+
+exit 0

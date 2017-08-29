@@ -1,0 +1,101 @@
+#!/bin/bash -p
+
+codename=$1
+package=$2
+version=$3
+arch=$4
+job=$5
+
+source /home/vinaigrette/config
+source /home/vinaigrette/package_helpers.sh
+XMPP_BOT_KEY=$(cat /home/vinaigrette/keys/xmppbotkey)
+
+# Repository codename to add package to
+CODENAME=
+
+# Either adding package to rpi repo or not
+ADD_TO_RPI=false
+
+# Architecture independent packages are built on default arch
+ARCH=$arch
+[[ $arch == all ]] && ARCH=$DEFAULT_ARCH
+
+# Resulting changes file
+CHANGES_FILE=$PBUILDER_RESULTS/${package}_${version}_${ARCH}.changes
+
+# Retrieve distribution/component
+DISTRIBUTION=$(get_distribution $CHANGES_FILE)
+
+# Attempt to extract Debian codename from Distribution
+extract_codename_distribution $DISTRIBUTION || exit 1
+[ -z "$CODENAME" ] && CODENAME=$1
+
+# Add to rpi
+#if [[ $4 == all ]] && [[ $DISTRIBUTION != unstable ]]; then
+#    ADD_TO_RPI=true
+#fi
+
+# Retrieving component from source package
+get_source_component() {
+    reprepro -b $REPO_DIR -T dsc --list-max 1 --list-format '${$component}' \
+        listfilter $CODENAME "\$Source (==${package}), \$SourceVersion (==${version})"
+}
+COMPONENT=$(get_source_component)
+if [ -z "$COMPONENT" ]; then
+    echo "Unable to retrieve source package component"
+    exit 1
+fi
+
+# Add to patate - soon-deprecated repo
+ADD_TO_PATATE=false
+if [[ $arch == all ]] && [[ $COMPONENT == "old-stable" ]]; then
+    ADD_TO_PATATE=true
+fi
+
+echo \
+"******************************************************************************"
+echo "Adding binary package..."
+
+include_to() {
+    # Include changes to the given repo (waiting 1m max)
+    echo "Adding to ${1}/$COMPONENT..."
+    reprepro --waitforlock 6 -b $REPO_DIR -C $COMPONENT include $1 \
+        $CHANGES_FILE > /dev/null 1>&1 || return 1
+}
+include_to_patate() {
+    echo "Adding to soon-deprecated repository in megusta..."
+    reprepro --waitforlock 6 -b $PATATE_REPO_DIR include megusta \
+        $CHANGES_FILE > /dev/null 1>&1 || return 1
+}
+
+status=0
+if include_to $CODENAME ; then
+    if $ADD_TO_RPI; then
+        include_to "${CODENAME}/rpi" || status=1
+    fi
+else
+    status=1
+fi
+if $ADD_TO_PATATE; then
+    include_to_patate || status=2
+fi
+
+if [ $status -eq 0 ]; then
+    # Clean pbuilder results
+    for f in $(get_files $CHANGES_FILE); do
+        rm -f /var/cache/pbuilder/result/$f
+    done
+fi
+
+
+# Send notification on xmpp dev room
+
+export HOME=$HOME_PBUILDER
+
+xmpp_msg="[rebuildd] Completed build of ${package}/${version} in ${COMPONENT} for ${CODENAME}/${arch}. See http://rebuild.yunohost.org/job/${job}"
+
+echo -n "$xmpp_msg" \
+    | sendxmpp -u gitbot -j im.yunohost.org -p $XMPP_BOT_KEY \
+        -c dev@conference.yunohost.org -r GitBot
+
+exit $status

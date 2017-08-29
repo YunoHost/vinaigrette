@@ -1,0 +1,38 @@
+#!/bin/bash
+
+DEBSIGN_KEYID=59A3E6FF
+DEBFULLNAME="YunoHost Contributors"
+DEBEMAIL="contrib@yunohost.org"
+
+HOME_VINAIGRETTE="/home/vinaigrette"
+GIT_REPOS="$HOME_VINAIGRETTE/repos/"
+BUILD_DEB="$HOME_VINAIGRETTE/build_deb"
+
+PBUILDER_HOME="$HOME_VINAIGRETTE/pbuilder/"
+PBUILDER_IMAGES="$PBUILDER_HOME/images/"
+PBUILDER_RESULTS="$PBUILDER_HOME/results/"
+DAILY_PACKAGES="$PBUILDER_HOME/packages/"
+
+BUILD_SOURCES="$PBUILDER_HOME/build-sources"
+INCLUDE_CHANGES="$HOME_VINAIGRETTE/repo/include-changes"
+
+REPO_DIR=/var/www/repo/debian
+PATATE_REPO_DIR=/var/www/repo/patate
+
+
+
+
+AVAILABLE_CODENAMES="wheezy jessie stretch"
+DEFAULT_CODENAME="jessie"
+
+AVAILABLE_COMPONENTS="old-stable stable testing unstable extra"
+DEFAULT_COMPONENT="unstable"
+
+AVAILABLE_ARCH="amd64 i386 armhf"
+DEFAULT_ARCH="amd64"
+
+
+
+
+DEPS="pbuilder reprepro"
+DEPS="dpkg-parsechangelog pbuilder mk-build-deps debuild debclean reprepo sendxmpp"

@@ -1,0 +1,10 @@
+#!/bin/bash
+ 
+codename=$1
+package=$2
+version=$3
+ 
+sudo apt-get update > /dev/null 1>&1
+#apt-get -q --download-only --only-source -t $codename \
+apt-get -q --download-only --only-source \
+    source ${package}=${version}

@@ -1,0 +1,118 @@
+#!/bin/bash
+
+# Default options values
+## Either building source in a chroot env or not
+BUILD_SRC_LOCALLY=false
+
+## Debian distribution to use
+CODENAME=
+DISTRIBUTION=
+
+# Global and environment variables
+source /home/vinaigrette/config
+export DEBSIGN_KEYID
+export DEBFULLNAME
+export DEBEMAIL
+
+usage()
+{
+cat << EOF
+Usage: `basename $0` [options] DIR
+
+ARGUMENTS:
+   DIR     Root directory of the package to build
+
+OPTIONS:
+   -c CODENAME  Debian codename target
+                (one of: $AVAILABLE_CODENAMES)
+   -d COMPONENT Repository component to put package in
+                (one of: $AVAILABLE_COMPONENTS)
+   -l           Build sources locally (without pbuilder)
+   -h           Print this help
+EOF
+exit
+}
+
+# Parse options
+while getopts :c:d:lh option; do
+    case "$option" in
+        c)
+            CODENAME=$OPTARG
+            ;;
+        d)
+            DISTRIBUTION=$OPTARG
+            ;;
+        l)
+            BUILD_SRC_LOCALLY=true
+            ;;
+        h)
+            usage
+            ;;
+        :)
+            echo "Option -$OPTARG requires an argument"
+            exit 1
+            ;;
+        \?)
+            echo "-$OPTARG: invalid option"
+            exit 1
+            ;;
+    esac
+done
+
+shift $((OPTIND-1))
+
+# Parse DIR argument
+if [ $# -ne 1 ]; then
+    echo -e "Error: Missing DIR argument\n"
+    usage
+fi
+PKG_DIR=$(readlink -fn $1)
+ROOT_DIR=$(readlink -fn ${PKG_DIR}/../)
+
+# Retrieve package info
+cd $PKG_DIR
+package=$(dpkg-parsechangelog | awk '/^Source: / {print $2}')
+version=$(dpkg-parsechangelog | awk '/^Version: / {print $2}')
+distribution=$(dpkg-parsechangelog | awk '/^Distribution: / {print $2}')
+
+# Set and validate codename & distribution
+if [ -z "$CODENAME" ]; then
+    CODENAME=$DEFAULT_CODENAME
+elif ! [[ $AVAILABLE_CODENAMES =~ ^(.* |)$CODENAME( .*|)$ ]]; then
+    echo "Unmanaged codename '$CODENAME'"
+    exit 1
+fi
+if [ -z "$DISTRIBUTION" ]; then
+    extract_codename_distribution $distribution || exit 1
+fi
+
+changes_file=${ROOT_DIR}/${package}_${version}_source.changes
+
+echo "Building source package of ${package}_${version}..."
+if $BUILD_SRC_LOCALLY; then
+    debuild -S -sa > /dev/null
+else
+    img="${PBUILDER_IMAGES}/amd64/${CODENAME}.tgz"
+    sudo pbuilder execute --bindmounts ${ROOT_DIR} \
+        --basetgz ${img} -- ${BUILD_SOURCES} $PKG_DIR
+fi
+if [ $? -ne 0 ] || [ ! -f ${changes_file} ]; then
+    echo "An error occured while building source package"
+    exit 1
+fi
+
+echo "Adding ${package}_${version} to ${CODENAME}/${DISTRIBUTION}..."
+$INCLUDE_CHANGES $CODENAME $DISTRIBUTION $changes_file
+if [ $? -ne 0 ]; then
+    echo "An error occured while including source package"
+    exit 1
+fi
+
+#echo "Process incoming in repository..."
+#sudo reprepro -V -b $REPO_DIR processincoming incoming
+#if [ $? -ne 0 ]; then
+#    echo "An error occured while processing incoming"
+#    exit 1
+#fi
+
+echo "Build will start soon. See http://rebuild.yunohost.org"

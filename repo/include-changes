@@ -1,0 +1,22 @@
+#!/bin/bash
+
+codename=$1
+distribution=$2
+changes_file=$3
+
+source /home/vinaigrette/config
+source /home/vinaigrette/package_helpers.sh
+
+sudo reprepro -C $distribution -V -b $REPO_DIR include $codename $changes_file
+RET=$?
+
+# Cleaning files
+if [ $RET -eq 0 ]; then
+    dir=$(cd `dirname $changes_file` && pwd)
+    for f in $(get_files ${changes_file}); do
+        ! [[ $f =~ \.orig\.tar\.(gz|xz)$ ]] && sudo rm -f ${dir}/$f
+    done
+    sudo rm -f $changes_file
+fi
+
+exit $RET
