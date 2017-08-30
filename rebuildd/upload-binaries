@@ -95,7 +95,7 @@ export HOME=$HOME_PBUILDER
 xmpp_msg="[rebuildd] Completed build of ${package}/${version} in ${COMPONENT} for ${CODENAME}/${arch}. See http://rebuild.yunohost.org/job/${job}"
 
 echo -n "$xmpp_msg" \
-    | sendxmpp -u gitbot -j im.yunohost.org -p $XMPP_BOT_KEY \
+    | $SENDXMPP -u gitbot -j im.yunohost.org -p $XMPP_BOT_KEY \
         -c dev@conference.yunohost.org -r GitBot
 
 exit $status

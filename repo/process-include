@@ -6,9 +6,8 @@ package=$3
 version=$4
 changes_file=$5
 
-source /usr/local/lib/helpers/debian/package.sh
-
-MAIL="rebuildd@yunohost.org"
+source /home/vinaigrette/config
+source /home/vinaigrette/package_helpers.sh
  
 # Only care about packages being added
 if [[ $action != accepted ]]; then
