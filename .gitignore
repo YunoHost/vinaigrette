@@ -1,2 +1,2 @@
-pbuilder/images/*
-keys/*
+images/*
+config/keys/*

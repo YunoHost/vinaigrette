@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source /home/vinaigrette/config
+source /home/vinaigrette/config/config
 
 # ##### #
 # Usage #

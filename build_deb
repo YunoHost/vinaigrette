@@ -9,7 +9,7 @@ CODENAME=
 DISTRIBUTION=
 
 # Global and environment variables
-source /home/vinaigrette/config
+source /home/vinaigrette/config/config
 export DEBSIGN_KEYID
 export DEBFULLNAME
 export DEBEMAIL

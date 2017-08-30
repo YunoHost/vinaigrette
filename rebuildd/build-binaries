@@ -5,7 +5,7 @@ package=$2
 version=$3
 arch=$4
 
-source /home/vinaigrette/config
+source /home/vinaigrette/config/config
 source /home/vinaigrette/package_helpers.sh
 
 # Build only binary-only limited to architecture dependent packages
@@ -34,12 +34,12 @@ echo "Starting building..."
 # Format needed pbuilder arguments
 DEBBUILDOPTS="$DEBBUILDOPTS -j$JOBS"
 DSC_FILE="${package}_${version}.dsc"
-BASE_TGZ="/var/cache/pbuilder/images/${arch}/${codename}.tgz"
+BASE_TGZ="${PBUILDER_IMAGES}/${arch}/${codename}.tgz"
 EXTRA_OPTS=()
 
 # Use specific conf for nodejs builds
 if [[ $package =~ ^yunohost-admin$ ]]; then
-    base_tgz="/var/cache/pbuilder/images/${arch}/${codename}-nodejs.tgz"
+    base_tgz="${PBUILDER_IMAGES}/${arch}/${codename}-nodejs.tgz"
     if [[ -f ${base_tgz} ]]; then
         echo "+ using nodejs environment..."
 	BASE_TGZ=${base_tgz}

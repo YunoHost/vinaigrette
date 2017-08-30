@@ -6,7 +6,7 @@ version=$3
 arch=$4
 job=$5
 
-source /home/vinaigrette/config
+source /home/vinaigrette/config/config
 source /home/vinaigrette/package_helpers.sh
 XMPP_BOT_KEY=$(cat /home/vinaigrette/keys/xmppbotkey)
 
