@@ -8,7 +8,7 @@ job=$5
 
 source /home/vinaigrette/config/config
 source /home/vinaigrette/package_helpers.sh
-XMPP_BOT_KEY=$(cat /home/vinaigrette/keys/xmppbotkey)
+XMPP_BOT_KEY=$(cat /home/vinaigrette/config/keys/xmppbotkey)
 
 # Repository codename to add package to
 CODENAME=
@@ -95,7 +95,7 @@ export HOME=$HOME_PBUILDER
 xmpp_msg="[rebuildd] Completed build of ${package}/${version} in ${COMPONENT} for ${CODENAME}/${arch}. See http://rebuild.yunohost.org/job/${job}"
 
 echo -n "$xmpp_msg" \
-    | $SENDXMPP -u gitbot -j im.yunohost.org -p $XMPP_BOT_KEY \
+    | sendxmpp -u gitbot -j im.yunohost.org -p "$XMPP_BOT_KEY" \
         -c dev@conference.yunohost.org -r GitBot
 
 exit $status
