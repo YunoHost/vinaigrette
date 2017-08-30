@@ -20,7 +20,7 @@ mkdir -p /var/www/repo/debian/conf/
 cd $VINAIGRETTE_HOME/
 cp config/distributions /var/www/repo/debian/conf/
 
-cp $VINAIGRETTE_HOME/rebuildd/rebuildd.conf /etc/rebuildd/rebuilddrc
+cp $VINAIGRETTE_HOME/config/rebuildd.conf /etc/rebuildd/rebuilddrc
 
 cat $VINAIGRETTE_HOME/config/keys/$DEBSIGN_KEYID.pub | apt-key add
 cat $VINAIGRETTE_HOME/config/sources.list >> /etc/apt/sources.list
