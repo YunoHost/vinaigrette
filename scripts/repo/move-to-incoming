@@ -3,7 +3,7 @@
 changes_file=$1
 
 source /home/vinaigrette/config/config
-source /home/vinaigrette/package_helpers.sh
+source /home/vinaigrette/scripts/package_helpers.sh
 
 INCOMING_DIR=${REPO_DIR}/incoming
 

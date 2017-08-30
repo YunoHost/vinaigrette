@@ -7,7 +7,7 @@ arch=$4
 job=$5
 
 source /home/vinaigrette/config/config
-source /home/vinaigrette/package_helpers.sh
+source /home/vinaigrette/scripts/package_helpers.sh
 XMPP_BOT_KEY=$(cat /home/vinaigrette/config/keys/xmppbotkey)
 
 # Repository codename to add package to

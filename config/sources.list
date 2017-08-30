@@ -1,2 +1,2 @@
 deb-src http://repo.yunohost.org/debian jessie stable testing unstable extra
-#deb-src http://repo.yunohost.org/debian stretch extra
+deb-src http://repo.yunohost.org/debian stretch stable testing unstable extra

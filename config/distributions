@@ -11,7 +11,7 @@ Description: YunoHost repository for Debian Jessie
 SignWith: 59A3E6FF
 Tracking: all includechanges keepsources
 Log: logfile
- --changes --via=include /home/vinaigrette/repo/process-include
+ --changes --via=include /home/vinaigrette/scripts/repo/process-include
 
 Origin: YunoHost
 Label: YunoHost for Stretch
@@ -25,4 +25,4 @@ Description: YunoHost repository for Debian Stretch
 SignWith: 59A3E6FF
 Tracking: all includechanges keepsources
 Log: logfile
- --changes --via=include /home/vinaigrette/repo/process-include
+ --changes --via=include /home/vinaigrette/scripts/repo/process-include

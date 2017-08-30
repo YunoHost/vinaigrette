@@ -5,7 +5,7 @@ distribution=$2
 changes_file=$3
 
 source /home/vinaigrette/config/config
-source /home/vinaigrette/package_helpers.sh
+source /home/vinaigrette/scripts/package_helpers.sh
 
 sudo reprepro -C $distribution -V -b $REPO_DIR include $codename $changes_file
 RET=$?

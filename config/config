@@ -22,9 +22,8 @@ DEFAULT_ARCH="amd64"
 
 HOME_VINAIGRETTE="/home/vinaigrette"
 GIT_REPOS="$HOME_VINAIGRETTE/gitrepos/"
-BUILD_DEB="$HOME_VINAIGRETTE/build_deb"
 
-PBUILDER_HOME="$HOME_VINAIGRETTE/pbuilder/"
+PBUILDER_HOME="$HOME_VINAIGRETTE/scripts/pbuilder/"
 PBUILDER_IMAGES="$HOME_VINAIGRETTE/images/"
 PBUILDER_RESULTS="$PBUILDER_HOME/result"
 DAILY_PACKAGES="$PBUILDER_HOME/packages/"
@@ -34,6 +33,7 @@ PATATE_REPO_DIR=/var/www/repo/patate
 # Scripts
 
 BUILD_SOURCES="$PBUILDER_HOME/build-sources"
-INCLUDE_CHANGES="$HOME_VINAIGRETTE/repo/include-changes"
+BUILD_DEB="$HOME_VINAIGRETTE/scripts/build_deb"
+INCLUDE_CHANGES="$HOME_VINAIGRETTE/scripts/repo/include-changes"
 
 
