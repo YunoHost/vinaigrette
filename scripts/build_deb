@@ -115,4 +115,4 @@ fi
 #    exit 1
 #fi
 
-echo "Build will start soon. See http://rebuild.yunohost.org"
+echo "Build will start soon. See http://$REPO_URL"
