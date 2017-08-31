@@ -35,8 +35,8 @@ cp $VINAIGRETTE_HOME/config/nginx.conf /etc/nginx/sites-enabled/repo.conf
 cat $VINAIGRETTE_HOME/config/keys/$DEBSIGN_KEYID.pub | apt-key add
 cat $VINAIGRETTE_HOME/config/sources.list > /etc/apt/sources.list.d/vinaigrette.list
 
-sed -i "s/__REPO_URL__/$REPO_URL/g" > /etc/nginx/sites-enabled/repo.conf
-sed -i "s/__REPO_URL__/$REPO_URL/g" > /etc/apt/sources.list.d/vinaigrette.list
+sed -i "s/__REPO_URL__/$REPO_URL/g" /etc/nginx/sites-enabled/repo.conf
+sed -i "s/__REPO_URL__/$REPO_URL/g" /etc/apt/sources.list.d/vinaigrette.list
 
 echo "127.0.0.1 $REPO_URL" >> /etc/hosts
 service nginx reload

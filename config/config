@@ -28,7 +28,6 @@ PBUILDER_IMAGES="$HOME_VINAIGRETTE/images/"
 PBUILDER_RESULTS="$PBUILDER_HOME/result"
 DAILY_PACKAGES="$PBUILDER_HOME/packages/"
 REPO_DIR=/var/www/repo/debian
-PATATE_REPO_DIR=/var/www/repo/patate
 
 # Scripts
 

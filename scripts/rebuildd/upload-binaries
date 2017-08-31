@@ -46,12 +46,6 @@ if [ -z "$COMPONENT" ]; then
     exit 1
 fi
 
-# Add to patate - soon-deprecated repo
-ADD_TO_PATATE=false
-if [[ $arch == all ]] && [[ $COMPONENT == "old-stable" ]]; then
-    ADD_TO_PATATE=true
-fi
-
 echo \
 "******************************************************************************"
 echo "Adding binary package..."
@@ -62,11 +56,6 @@ include_to() {
     reprepro --waitforlock 6 -b $REPO_DIR -C $COMPONENT include $1 \
         $CHANGES_FILE > /dev/null 1>&1 || return 1
 }
-include_to_patate() {
-    echo "Adding to soon-deprecated repository in megusta..."
-    reprepro --waitforlock 6 -b $PATATE_REPO_DIR include megusta \
-        $CHANGES_FILE > /dev/null 1>&1 || return 1
-}
 
 status=0
 if include_to $CODENAME ; then
@@ -75,9 +64,6 @@ if include_to $CODENAME ; then
     fi
 else
     status=1
-fi
-if $ADD_TO_PATATE; then
-    include_to_patate || status=2
 fi
 
 if [ $status -eq 0 ]; then
