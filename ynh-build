@@ -7,7 +7,7 @@ source /home/vinaigrette/config/config
 # ##### #
 
 usage() {
-    echo "
+    cat << EOF
 Usage:
   `basename $0` <project> <branch> <version>
 
@@ -16,7 +16,7 @@ Arguments:
   <branch>      testing or stable
   <distrib>     jessie or stretch
   <version>     x.y.z (ex: 2.6.1)
-"
+EOF
 }
 
 if [[ $1 == "-h" ]]; then
@@ -28,36 +28,33 @@ fi
 # Check user inputs #
 # ################# #
 
+PROJECT=$1
+BRANCH=$2
+DISTRIB=$3
+VERSION=$4
+
 ## Project
-if [[ $1 =~ ^yunohost|yunohost-admin|moulinette|SSOwat$ ]]; then
-    PROJECT=$1
-else
-    echo "Invalid project $1"
+if [[ ! $PROJECT =~ ^yunohost|yunohost-admin|moulinette|SSOwat$ ]]; then
+    echo "Invalid project $PROJECT"
     usage
     exit 1
 fi
 
 ## Branch
-if [[ $2 =~ ^testing|stable$ ]]; then
-    BRANCH=$2
-else
-    echo "Invalid branch $2"
+if [[ ! $BRANCH =~ ^testing|stable$ ]]; then
+    echo "Invalid branch $BRANCH"
     usage
     exit 2
 fi
 
 # Distribution 
-if [[ $3 =~ ^jessie|stretch$ ]]; then
-    DISTRIB=$3
-else
-    echo "Invalid distribution $3"
+if [[ ! $DISTRIB =~ ^jessie|stretch$ ]]; then
+    echo "Invalid distribution $DISTRIB"
     usage
     exit 3
 fi
 
 # Version
-VERSION=$4
-echo $VERSION
 if [ -z "$VERSION" ]; then
     echo "Invalid version $VERSION"
     usage
