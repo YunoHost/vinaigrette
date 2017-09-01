@@ -1,0 +1,5 @@
+bottle==0.12.9
+distribute>=0.6.24
+flup==1.0.3.dev20161029
+wsgiref==0.1.2
+urllib>=1.21.1

@@ -1,5 +1,6 @@
 
 apt-get install nginx pbuilder reprepro rebuildd gawk sendxmpp -y
+apt-get install python-virtualenv python3-pip -y
 
 VINAIGRETTE_HOME="/home/vinaigrette"
 
@@ -16,10 +17,10 @@ git clone https://github.com/yunohost/ssowat
 git clone https://github.com/yunohost/moulinette
 
 cd yunohost
-git symbolic-ref refs/heads/jessie-stable refs/heads/stable
-git symbolic-ref refs/heads/jessie-testing refs/heads/testing
-git symbolic-ref refs/heads/jessie-unstable refs/heads/unstable
-git symbolic-ref refs/heads/stretch-unstable refs/heads/stretch
+git checkout stable   && git symbolic-ref refs/heads/jessie-stable refs/heads/stable
+git checkout testing  && git symbolic-ref refs/heads/jessie-testing refs/heads/testing
+git checkout unstable && git symbolic-ref refs/heads/jessie-unstable refs/heads/unstable
+git checkout stretch  && git symbolic-ref refs/heads/stretch-unstable refs/heads/stretch
 cd ..
 
 mkdir -p /var/www/repo/debian/conf/
@@ -42,3 +43,14 @@ echo "127.0.0.1 $REPO_URL" >> /etc/hosts
 service nginx reload
 
 rebuildd init
+
+
+cd $VINAIGRETTE_HOME/webhooks
+virtualenv venv
+source venv/bin/activate
+pip install -r requirements.txt
+
+cp $VINAIGRETTE_HOME/webhooks/service /etc/init.d/github-webhook
+systemctl daemon-reload
+updated-rc.d github-webhook defaults
+github-webhook
