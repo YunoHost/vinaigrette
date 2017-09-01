@@ -54,12 +54,7 @@ Useful commands
 How this shit works
 -------------------
 
-- Let's say you run `ynh-build` because of a new version of yunohost
-- (Warning : make sure that you have a new entry in debian/changelog, and a tag debian/x.y.z - otherwise it won't be happy if the version already exists)
-- The script make sure the repo and the proper branch is up to date locally
-- It calls `build_deb`, which will build the sources with `pbuilder` and push the sources with `reprepro`
-- With some magic involved (?), `rebuildd` understands that there's something new to build
-- `rebuildd` picks up the job. It gets the sources (`get-sources`) and starts building the binaries (`build-binaries`). After that, it uploads the binaries to reprepro (`upload-binaries`) and sends an XMPP notification
+![](doc/buildchain.png)
 
 Misc notes
 ----------
