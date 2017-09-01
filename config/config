@@ -22,12 +22,13 @@ DEFAULT_ARCH="amd64"
 
 HOME_VINAIGRETTE="/home/vinaigrette"
 GIT_REPOS="$HOME_VINAIGRETTE/gitrepos/"
+REPO_DIR=/var/www/repo/debian
 
 PBUILDER_HOME="$HOME_VINAIGRETTE/scripts/pbuilder/"
 PBUILDER_IMAGES="$HOME_VINAIGRETTE/images/"
 PBUILDER_RESULTS="$PBUILDER_HOME/result"
 DAILY_PACKAGES="$PBUILDER_HOME/packages/"
-REPO_DIR=/var/www/repo/debian
+PBUILDER_CONF="$PBUILDER_HOME/config/pbuilder/"
 
 # Scripts
 

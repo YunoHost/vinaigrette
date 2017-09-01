@@ -1,5 +1,6 @@
 
 apt-get install nginx pbuilder reprepro rebuildd gawk sendxmpp -y
+apt-get install qemu-system-arm debootstrap -y
 apt-get install python-virtualenv python3-pip -y
 
 VINAIGRETTE_HOME="/home/vinaigrette"
@@ -31,6 +32,9 @@ ln -s $VINAIGRETTE_HOME/config/rebuildd.conf /etc/rebuildd/rebuilddrc
 
 ln -s $VINAIGRETTE_HOME/images /var/cache/pbuilder/images
 ln -s /var/cache/pbuilder/result $PBUILDER_RESULTS
+
+ln -s $PBUILDER_CONF/pbuilder.conf /etc/pbuilderrc
+
 cp $VINAIGRETTE_HOME/config/nginx.conf /etc/nginx/sites-enabled/repo.conf
 
 cat $VINAIGRETTE_HOME/config/keys/$DEBSIGN_KEYID.pub | apt-key add

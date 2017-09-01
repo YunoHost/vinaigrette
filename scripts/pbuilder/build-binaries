@@ -49,7 +49,7 @@ fi
 case $arch in
   armhf)
     pbuilder build --debbuildopts "${DEBBUILDOPTS}" \
-        --configfile /etc/pbuilder/rc.d/armhf \
+        --configfile $PBUILDER_CONF/armhf.conf \
         --basetgz $BASE_TGZ "${EXTRA_OPTS[@]}" $DSC_FILE
     exit_code=$?
     ;;
