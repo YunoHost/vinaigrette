@@ -59,6 +59,10 @@ How this shit works
 Misc notes
 ----------
 
+#### Hooks thingy
+
+At the start of the build, pbuilder will call the hooks in scripts/pbuilder/hooks 
+
 #### If you need to rebuild custom packages (for instance, metronome ?)
 
 - Go to a git clone of https://github.com/yunohost/metronome/

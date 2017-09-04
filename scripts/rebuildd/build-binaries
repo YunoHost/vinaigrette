@@ -27,38 +27,36 @@ else
     JOBS=1
 fi
 
-echo \
-"******************************************************************************"
-echo "Starting building..."
+echo "######################"
+echo " Starting build ...   "
+echo "######################"
 
 # Format needed pbuilder arguments
 DEBBUILDOPTS="$DEBBUILDOPTS -j$JOBS"
 DSC_FILE="${package}_${version}.dsc"
 BASE_TGZ="${PBUILDER_IMAGES}/${arch}/${codename}.tgz"
 EXTRA_OPTS=()
+CONFIGFILE=""
 
 # Use specific conf for nodejs builds
-if [[ $package =~ ^yunohost-admin$ ]]; then
-    base_tgz="${PBUILDER_IMAGES}/${arch}/${codename}-nodejs.tgz"
-    if [[ -f ${base_tgz} ]]; then
-        echo "+ using nodejs environment..."
-	BASE_TGZ=${base_tgz}
-    fi
+if [[ $package == "yunohost-admin" ]];
+then
+    BASE_TGZ="${PBUILDER_IMAGES}/${arch}/${codename}-nodejs.tgz"
+    CONFIGFILE="--configfile $PBUILDER_CONF/nodejs.conf"
+fi
+        
+if [[ $arch == "armhf" ]]; 
+then
+   CONFIGFILE="--configfile $PBUILDER_CONF/armhf.conf"
 fi
 
-case $arch in
-  armhf)
-    pbuilder build --debbuildopts "${DEBBUILDOPTS}" \
-        --configfile $PBUILDER_CONF/armhf.conf \
-        --basetgz $BASE_TGZ "${EXTRA_OPTS[@]}" $DSC_FILE
-    exit_code=$?
-    ;;
+pbuilder build                            \
+         --basetgz "${BASE_TGZ}"          \
+ 	 --debbuildopts "${DEBBUILDOPTS}" \
+ 	 ${CONFIGFILE}                    \
+ 	 "${EXTRA_OPTS[@]}"               \
+	 $DSC_FILE
 
-  amd64|i386)
-    pbuilder build --debbuildopts "${DEBBUILDOPTS}" \
-        --basetgz $BASE_TGZ "${EXTRA_OPTS[@]}" $DSC_FILE
-    exit_code=$?
-    ;;
-esac
+exit_code=$?
 
 exit $exit_code
