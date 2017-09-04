@@ -33,6 +33,7 @@ ln -s $VINAIGRETTE_HOME/config/rebuildd.conf /etc/rebuildd/rebuilddrc
 ln -s $VINAIGRETTE_HOME/images /var/cache/pbuilder/images
 ln -s /var/cache/pbuilder/result $PBUILDER_RESULTS
 
+rm -f /etc/pbuilderrc
 ln -s $PBUILDER_CONF/pbuilder.conf /etc/pbuilderrc
 
 cp $VINAIGRETTE_HOME/config/nginx.conf /etc/nginx/sites-enabled/repo.conf
@@ -48,13 +49,11 @@ service nginx reload
 
 rebuildd init
 
-
-cd $VINAIGRETTE_HOME/webhooks
-virtualenv venv
-source venv/bin/activate
-pip install -r requirements.txt
-
-cp $VINAIGRETTE_HOME/webhooks/service /etc/init.d/github-webhook
-systemctl daemon-reload
-updated-rc.d github-webhook defaults
-github-webhook
+#cd $VINAIGRETTE_HOME/webhooks
+#virtualenv venv
+#source venv/bin/activate
+#pip install -r requirements.txt
+#cp $VINAIGRETTE_HOME/webhooks/service /etc/init.d/github-webhook
+#systemctl daemon-reload
+#updated-rc.d github-webhook defaults
+#github-webhook
