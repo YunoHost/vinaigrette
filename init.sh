@@ -43,6 +43,7 @@ cat $VINAIGRETTE_HOME/config/sources.list > /etc/apt/sources.list.d/vinaigrette.
 
 sed -i "s/__REPO_URL__/$REPO_URL/g" /etc/nginx/sites-enabled/repo.conf
 sed -i "s/__REPO_URL__/$REPO_URL/g" /etc/apt/sources.list.d/vinaigrette.list
+echo "deb https://deb.nodesource.com/node_4.x stretch main" >> /etc/apt/sources.list
 
 echo "127.0.0.1 $REPO_URL" >> /etc/hosts
 service nginx reload
