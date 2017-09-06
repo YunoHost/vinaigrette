@@ -74,3 +74,14 @@ At the start of the build, pbuilder will call the hooks in scripts/pbuilder/hook
 - To build stuff, pbuilder needs to chroot in environnement.
 - These are contained in `images/$arch/$dist.tgz`
 - You may be able to regerate them 'from scratch' with `rebuildd-init-build-system`. Not sure entirely how this works though. I guess it reads distributions and archs from conf file ?
+
+#### 'Packages' are generally 'source packages' for debian people
+
+Interesting note from [this page](http://tldp.org/HOWTO/html_single/Debian-Binary-Package-Building-HOWTO/)
+
+>an maintainers, packages are source packages, not binary packages. They never interact directly with the internals binary packages. In fact only 'dpkg-deb' and 'dpkg' developers need to know what they are. In fact it is not recommended to do so.
+>
+>If a developer were to explain someone how to build a Debian package, he will certainly explain how to make a source package and how to build it.
+>
+>On the other hand, not every developer wants to submit his software to Debian (yet), but still wants to profit from the advantages a packaging system like 'dpkg' offers without releasing package source code. Personally I will release my freeware projects still as tar.gz files with source code etc. for all kind of platforms, while I plan to offer more and more '.deb' packages for the convenience of Debian users who just want to install and use my software. 
+
