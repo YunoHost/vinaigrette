@@ -1,102 +1,152 @@
 #!/bin/bash
 
+readonly THISSCRIPT=$0
+readonly PROJECT=$1
+readonly BRANCH=$2
+readonly DISTRIB=$3
+readonly VERSION=$4
+readonly TAG="debian/$VERSION"
+
 source /home/vinaigrette/config/config
 
 # ##### #
 # Usage #
 # ##### #
 
-usage() {
+function usage()
+{
     cat << EOF
+
 Usage:
-  `basename $0` <project> <branch> <version>
+  $THISSCRIPT <project> <branch> <version>
 
 Arguments:
   <project>     moulinette, yunohost, yunohost-admin or SSOwat
   <branch>      testing or stable
   <distrib>     jessie or stretch
   <version>     x.y.z (ex: 2.6.1)
+
 EOF
 }
-
-if [[ $1 == "-h" ]]; then
-    usage
-    exit 0
-fi
 
 # ################# #
 # Check user inputs #
 # ################# #
 
-PROJECT=$1
-BRANCH=$2
-DISTRIB=$3
-VERSION=$4
+function validate_arguments()
+{
 
-## Project
-if [[ ! $PROJECT =~ ^yunohost|yunohost-admin|moulinette|SSOwat$ ]]; then
-    echo "Invalid project $PROJECT"
-    usage
-    exit 1
-fi
+    ## Project
+    if [[ ! $PROJECT =~ ^yunohost|yunohost-admin|moulinette|SSOwat$ ]]; then
+        echo "Invalid project $PROJECT"
+        usage
+        exit 1
+    fi
 
-## Branch
-if [[ ! $BRANCH =~ ^testing|stable$ ]]; then
-    echo "Invalid branch $BRANCH"
-    usage
-    exit 2
-fi
+    ## Branch
+    if [[ ! $BRANCH =~ ^testing|stable|unstable$ ]]; then
+        echo "Invalid branch $BRANCH"
+        usage
+        exit 2
+    fi
 
-# Distribution 
-if [[ ! $DISTRIB =~ ^jessie|stretch$ ]]; then
-    echo "Invalid distribution $DISTRIB"
-    usage
-    exit 3
-fi
+    # Distribution
+    if [[ ! $DISTRIB =~ ^jessie|stretch$ ]]; then
+        echo "Invalid distribution $DISTRIB"
+        usage
+        exit 3
+    fi
 
-# Version
-if [ -z "$VERSION" ]; then
-    echo "Invalid version $VERSION"
-    usage
-    exit 4
-fi
+    # Version
+    if [ -z "$VERSION" ]; then
+        echo "Invalid version $VERSION"
+        usage
+        exit 4
+    fi
+}
 
-# Sum up configuration
-echo "## #################################################### ##"
-echo "## Building $PROJECT $BRANCH release - $VERSION version"
-echo "## #################################################### ##"
+function checkout_tag()
+{
+    # Update project's repository
+    echo ""
+    echo "> Updating $GIT_REPOS/$PROJECT repository ... "
+    echo ""
 
-# Update project's repository
-echo ""
-echo "## Updating $GIT_REPOS/$PROJECT repository ..."
-cd $GIT_REPOS/$PROJECT
-git fetch --quiet
-git fetch --tags --quiet
-git checkout $BRANCH --quiet
-git pull origin $BRANCH --quiet
+    cd $GIT_REPOS/$PROJECT
+    git fetch --quiet
+    git fetch --tags --quiet
+    git checkout $DISTRIB-$BRANCH --quiet
+    #git checkout $BRANCH --quiet
+    #git pull origin $BRANCH --quiet
 
-# Check if tag really exists
-if git rev-parse "debian/$VERSION" >/dev/null 2>&1; then
-    TAG="debian/$VERSION"
-else
-    echo "Invalid version $VERSION (there's no debian/$VERSION tag in the git repo !)"
-    usage
-    exit
-fi
+    LASTVERSIONCHANGELOG=$(dpkg-parsechangelog -S Version 2>/dev/null)
+
+    if [[ "$VERSION" != "$LASTVERSIONCHANGELOG" ]]
+    then
+	echo "Version $VERSION is not the last version in changelog"
+	exit
+    fi
+
+    # Check if tag really exists
+    if ! git rev-parse "$TAG" >/dev/null 2>&1;
+    then
+        echo "Invalid version $VERSION (there's no tag $TAG in the git repo !)"
+        exit
+    fi
+    # Get commit for the tag and for HEAD
+    TAGCOMMIT=$(git rev-parse "$TAG")
+    HEADCOMMIT=$(git rev-parse "HEAD")
+
+    if [[ "$TAGCOMMIT" != "$HEADCOMMIT" ]]
+    then
+        echo "Tag $TAG is not the HEAD of the branch :/"
+        exit
+    fi
 
 
-# Create temporary folder
-TMP_FOLDER=$(mktemp -d)
+}
 
-# Extract git archive a desired tag
-echo ""
-echo "## Exporting in $TMP_FOLDER ..."
-git archive $TAG --format=tar | tar -x -C $TMP_FOLDER
+function build()
+{
+   # Create temporary folder
+   TMP_FOLDER=$(mktemp -d)
 
-# Build Debian package
-echo ""
-echo "## Building Debian package ..."
-echo ""
-cd $TMP_FOLDER
-$BUILD_DEB -d $BRANCH -c $DISTRIB .
+   # Extract git archive a desired tag
+   echo ""
+   echo "> Exporting in $TMP_FOLDER ...  "
+   echo ""
+   git archive $TAG --format=tar | tar -x -C $TMP_FOLDER
+
+   # Build Debian package
+   echo "###############################"
+   echo "# Building Debian package ... #"
+   echo "###############################"
+   cd $TMP_FOLDER
+   $BUILD_DEB -d $BRANCH -c $DISTRIB .
+}
+
+
+function main()
+{
+
+    # If used asked for help, show usage
+    if [[ $1 == "-h" ]] || [[ $1 == "--help" ]]; then
+        usage
+        exit 0
+    fi
+
+    validate_arguments
+
+    # Sum up configuration
+    echo "########################################################"
+    echo "# Building $PROJECT $BRANCH release - $VERSION version  "
+    echo "########################################################"
+
+    checkout_tag
+    build
+
+}
+
+
+main
 
