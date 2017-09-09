@@ -14,7 +14,7 @@ gpg --import config/keys/$DEBSIGN_KEYID.pub
 cd gitrepos/
 git clone https://github.com/yunohost/yunohost
 git clone https://github.com/yunohost/yunohost-admin
-git clone https://github.com/yunohost/ssowat
+git clone https://github.com/yunohost/ssowat SSOwat
 git clone https://github.com/yunohost/moulinette
 
 cd yunohost
