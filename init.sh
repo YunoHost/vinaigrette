@@ -29,6 +29,7 @@ ln -s $VINAIGRETTE_HOME/config/distributions /var/www/repo/debian/conf/distribut
 
 rm /etc/rebuildd/rebuilddrc
 ln -s $VINAIGRETTE_HOME/config/rebuildd.conf /etc/rebuildd/rebuilddrc
+ln -s $VINAIGRETTE_HOME/config/rebuildd.default /etc/default/rebuildd
 
 ln -s $VINAIGRETTE_HOME/images /var/cache/pbuilder/images
 ln -s /var/cache/pbuilder/result $PBUILDER_RESULTS

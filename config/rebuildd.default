@@ -1,0 +1,8 @@
+START_REBUILDD=1
+START_REBUILDD_HTTPD=1
+PBUILDER_BIN=/usr/sbin/pbuilder
+PBUILDER_CACHE_PATH="/var/cache/pbuilder"
+PBUILDER_MIRROR=http://ftp.debian.org/debian
+ARCHS="amd64 i386 armhf"
+DISTS="wheezy jessie stretch"
+ENABLE_BUILDER_MAINT=1
