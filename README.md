@@ -85,3 +85,15 @@ Interesting note from [this page](http://tldp.org/HOWTO/html_single/Debian-Binar
 >
 >On the other hand, not every developer wants to submit his software to Debian (yet), but still wants to profit from the advantages a packaging system like 'dpkg' offers without releasing package source code. Personally I will release my freeware projects still as tar.gz files with source code etc. for all kind of platforms, while I plan to offer more and more '.deb' packages for the convenience of Debian users who just want to install and use my software. 
 
+#### Relaunching a build manually with a shell ?
+
+- Copy the 'shell after error' hook : `cp /usr/share/doc/pbuilder/examples/C10shell /home/vinaigrette/scripts/pbuilder/hooks/`
+- cd /var/cache/rebuildd/build/
+- /home/vinaigrette/scripts/rebuildd/build-binaries stretch rspamd 1.6.4 armhf
+
+
+
+
+
+
+
