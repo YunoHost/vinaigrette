@@ -16,6 +16,8 @@ git clone https://github.com/yunohost/yunohost
 git clone https://github.com/yunohost/yunohost-admin
 git clone https://github.com/yunohost/ssowat SSOwat
 git clone https://github.com/yunohost/moulinette
+git clone https://github.com/yunohost/metronome
+git clone https://github.com/vstakhov/rspamd
 
 cd yunohost
 git checkout stable   && git symbolic-ref refs/heads/jessie-stable refs/heads/stable
