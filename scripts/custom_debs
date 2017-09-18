@@ -1,0 +1,90 @@
+#!/bin/bash
+
+readonly THISSCRIPT=$0
+readonly BRANCH="testing"
+readonly DISTRIB="stretch"
+readonly DEBIAN_BRANCH="testing"
+readonly BUILD_MESSAGE="YunoHost custom build."
+readonly YUNOHOST_PREFIX="+yunohost"
+readonly YUNOHOST_REVISION="-1"
+
+source /home/vinaigrette/config/config
+
+function main()
+{
+    build_metronome
+    build_rspamd
+}
+
+function build_metronome()
+{
+    local PACKAGE="metronome"
+    # For some reason metronome version must include a revision ("-x")
+    local VERSION="3.7.10${YUNOHOST_PREFIX}${YUNOHOST_REVISION}"
+
+    build $PACKAGE $VERSION
+}
+
+
+function build_rspamd()
+{
+    local PACKAGE="rspamd"
+
+    cd $GIT_REPOS/$PACKAGE
+    git checkout master
+    git pull origin master
+
+    # Get last tag and deduce version number to user...
+    local LASTTAG=$(git tag --list | grep "^1." | sort -n | tail -n1)
+    local VERSION="${LASTTAG}${YUNOHOST_PREFIX}"
+    git checkout $LASTTAG
+
+    build $PACKAGE $VERSION
+}
+
+function build()
+{
+    local PACKAGE=$1
+    local VERSION=$2
+
+    # SVERSION is VERSION without the -1 at the end ...
+    local SVERSION=$(echo $VERSION | tr '-' ' ' | awk '{print $1}')
+    
+    cd $GIT_REPOS/$PACKAGE
+
+    # Tweak the changelog temporarily
+    echo "> Setting version in changelog to ${VERSION}"
+    rm -f debian/changelog.dch
+    cp debian/changelog debian/changelog.old
+    dch --package "${PACKAGE}" \
+        --force-bad-version \
+	-v "${VERSION}" \
+	-D "${DEBIAN_BRANCH}" \
+	--force-distribution \
+	$BUILD_MESSAGE \ 
+        > /dev/null 2>&1
+
+    # Create temporary folder
+    TMP_FOLDER=$(mktemp -d)
+
+    # Extract git archive a desired tag
+    echo "> Exporting in $TMP_FOLDER ...  "
+    git ls-files | xargs tar -czf archive.tar.gz 
+    cat archive.tar.gz | tar -xz -C $TMP_FOLDER
+    # For some reason, these wants archive named 
+    # e.g. metronome_x.y.z+stuff.orig.tar.gz
+    # in the parent folder...
+    mv archive.tar.gz $TMP_FOLDER/../${PACKAGE}_${SVERSION}.orig.tar.gz
+
+    # Build Debian package
+    echo "> Starting build ..."
+    cd $TMP_FOLDER
+    $BUILD_DEB -d $BRANCH -c $DISTRIB .    # Restore changelog
+
+    echo "> Restoring previous changelog"
+    cd $GIT_REPOS/$PACKAGE
+    cp debian/changelog.old debian/changelog
+    rm debian/changelog.old
+}
+
+main
