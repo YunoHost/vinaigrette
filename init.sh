@@ -1,6 +1,6 @@
 
 apt-get install nginx pbuilder reprepro rebuildd gawk sendxmpp -y
-apt-get install qemu-system-arm debootstrap -y
+apt-get install qemu-system-arm debootstrap cdebootstrap qemu-user-static -y
 apt-get install python-virtualenv python3-pip -y
 
 # Fix the damn pbuilder-satistydepends (aptitude causes segfault on ARM)
@@ -36,6 +36,7 @@ ln -s $VINAIGRETTE_HOME/config/distributions /var/www/repo/debian/conf/distribut
 
 rm /etc/rebuildd/rebuilddrc
 ln -s $VINAIGRETTE_HOME/config/rebuildd.conf /etc/rebuildd/rebuilddrc
+rm /etc/default/rebuildd
 ln -s $VINAIGRETTE_HOME/config/rebuildd.default /etc/default/rebuildd
 
 ln -s $VINAIGRETTE_HOME/images /var/cache/pbuilder/images
