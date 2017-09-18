@@ -1,0 +1,86 @@
+#!/bin/bash
+
+readonly THISSCRIPT=$0
+readonly BRANCH_NIGHTLY="unstable"
+readonly DISTRIB="stretch"
+readonly TIMETAG="$(date +%Y%m%d%H%M)"
+readonly PACKAGES="moulinette SSOwat yunohost yunohost-admin"
+
+source /home/vinaigrette/config/config
+
+
+function main()
+{
+    for PACKAGE in $PACKAGES;
+    do
+
+        echo "-------------------------------------"
+        echo "Looking for update in ${PACKAGE} ... "
+
+        build_if_needed $PACKAGE
+
+    done
+    echo "-------------------------------------"
+}
+
+
+function build_if_needed()
+{
+    local PACKAGE=$1
+
+    cd $GIT_REPOS/$PACKAGE
+
+    git fetch origin
+    git checkout $BRANCH_NIGHTLY >/dev/null 2>/dev/null
+    if [ -z "$(git log $BRANCH_NIGHTLY..origin/$BRANCH_NIGHTLY)" ]; then
+        echo "Sources up-to-date, nothing to build."
+        return
+    fi
+    git pull origin $BRANCH_NIGHTLY >/dev/null
+
+    VERSION=$(dpkg-parsechangelog -S Version 2>/dev/null)
+    VERSION_NIGHTLY="${VERSION}~${TIMETAG}"
+
+    # Tweak the changelog temporarily
+    echo "> Setting version in changelog to ${VERSION_NIGHTLY}"
+    rm -f debian/changelog.dch
+    cp debian/changelog debian/changelog.old
+    dch --package "${PACKAGE}" \
+        --force-bad-version \
+	-v "${VERSION_NIGHTLY}" \
+	-D "${BRANCH_NIGHTLY}" \
+	--force-distribution \
+	"Daily build." \ 
+        > /dev/null 2>&1
+
+    head -n 10 debian/changelog
+
+    # Launch the build using build_deb script
+    build
+
+    # Restore changelog
+    echo "> Restoring previous changelog"
+    cd $GIT_REPOS/$PACKAGE
+    cp debian/changelog.old debian/changelog
+    rm debian/changelog.old
+
+}
+
+function build()
+{
+   # Create temporary folder
+   TMP_FOLDER=$(mktemp -d)
+
+   # Move files to a tmp folder
+   echo "> Exporting in $TMP_FOLDER ...  "
+   git ls-files | xargs tar -czf archive.tar.gz 
+   cat archive.tar.gz | tar -xz -C $TMP_FOLDER
+   rm archive.tar.gz
+
+   # Build Debian package
+   echo "> Starting build ..."
+   cd $TMP_FOLDER
+   $BUILD_DEB -d $BRANCH_NIGHTLY -c $DISTRIB .
+}
+
+main
