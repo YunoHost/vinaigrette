@@ -1,0 +1,50 @@
+#!/bin/sh
+
+#
+# Dirty hook to npm install, because I have no idea how this
+# is supposed to be done properly
+# (no network during the actual build)
+#
+
+if ls -d /build/yunohost-admin* >dev/null 2>&1
+then
+	echo "======================================================"
+	/usr/bin/apt-get install git nodejs -y
+	echo "========================"
+	echo "Patching debian/rules ..."
+	echo "========================"
+	cd /build/yunohost-admin* 
+	cat << EOF > rules.patch
+diff --git a/debian/rules b/debian/rules
+index b031511..477f27c 100755
+--- a/debian/rules
++++ b/debian/rules
+@@ -20,12 +20,14 @@ override_dh_auto_build:
+ 	sed -i 's/VERSION/\$(DEBVERS)/g' src/index.html
+ 
+ 	# Run npm/bower/gulp
+-	cd src ; npm --progress false --loglevel warn --color false install
++	#cd src ; npm --progress false --loglevel warn --color false install
+ 	cd src ; node_modules/gulp/bin/gulp.js build
++	rm -rf src/node_modules
++	rm -rf src/bower_components
+ 
+ override_dh_clean:
+ 	dh_clean
+-	rm -rf src/node_modules
+-	rm -rf src/bower_components
++	#rm -rf src/node_modules
++	#rm -rf src/bower_components
+ 	rm -rf src/dist
+EOF
+	patch -p1 < rules.patch
+	echo "========================"
+	echo "Starting npm install ..."
+	echo "========================"
+	mkdir /nonexistent
+	chown pbuilder:pbuilder /nonexistent
+	cd /build/yunohost-admin*/src
+	su pbuilder -c "npm install"
+	echo "======================================================"
+fi
+
