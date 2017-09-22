@@ -1,0 +1,23 @@
+
+readonly ARCH=amd64
+readonly DISTRIB=stretch
+readonly CHROOT=chroot-${DISTRIB}-${ARCH}
+readonly INIT_DIR=$PWD
+
+cd /tmp/
+cdebootstrap --arch=${ARCH} --foreign ${DISTRIB} ./$CHROOT http://deb.debian.org/debian/
+cp /usr/bin/qemu-arm-static $CHROOT/usr/bin/
+cp /etc/resolv.conf $CHROOT/etc/resolv.conf 
+
+chroot $CHROOT apt-get update
+chroot $CHROOT apt-get dist-upgrade
+chroot $CHROOT apt-get install -y build-essential debhelper cmake wget
+
+#chroot $CHROOT wget -q -O /tmp/setup_nodejs https://deb.nodesource.com/setup_4.x
+#chroot $CHROOT bash /tmp/setup_nodejs
+#chroot $CHROOT apt-get install -y nodejs
+
+chroot $CHROOT apt-get clean
+
+cd $CHROOT
+tar -czf $INIT_DIR/${DISTRIB}-${ARCH}.tgz ./*
