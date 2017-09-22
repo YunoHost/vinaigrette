@@ -31,12 +31,28 @@ function build_if_needed()
     cd $GIT_REPOS/$PACKAGE
 
     git fetch origin
-    git checkout $BRANCH_NIGHTLY >/dev/null 2>/dev/null
-    if [ -z "$(git log $BRANCH_NIGHTLY..origin/$BRANCH_NIGHTLY)" ]; then
+
+    # Check if there's a branch named distrib-branch (e.g. stretch-unstable)
+    # By default, keep just 'branch'
+    BRANCH_NIGHTLY_GIT="$BRANCH_NIGHTLY"
+    if git branch --list | awk '{print $1}' | grep -q "^$DISTRIB-$BRANCH_NIGHTLY$"
+    then
+	    BRANCH_NIGHTLY_GIT="$DISTRIB-$BRANCH_NIGHTLY"
+    fi
+
+    # If the branch name is an alias to another branch, "resolve" the alias
+    if grep -q "ref: " .git/refs/heads/$BRANCH_NIGHTLY_GIT
+    then
+	    BRANCH_NIGHTLY_GIT=$(cat .git/refs/heads/$BRANCH_NIGHTLY_GIT | tr '/' ' ' | awk '{print $4}')
+    fi
+
+    git checkout $BRANCH_NIGHTLY_GIT >/dev/null 2>/dev/null
+    if [ -z "$(git log ${BRANCH_NIGHTLY_GIT}..origin/${BRANCH_NIGHTLY_GIT})" ]; then
         echo "Sources up-to-date, nothing to build."
         return
     fi
-    git pull origin $BRANCH_NIGHTLY >/dev/null
+    git pull origin $BRANCH_NIGHTLY_GIT >/dev/null
+
 
     VERSION=$(dpkg-parsechangelog -S Version 2>/dev/null)
     VERSION_NIGHTLY="${VERSION}~${TIMETAG}"
@@ -50,7 +66,7 @@ function build_if_needed()
 	-v "${VERSION_NIGHTLY}" \
 	-D "${BRANCH_NIGHTLY}" \
 	--force-distribution \
-	"Daily build." \ 
+	"Daily build." \
         > /dev/null 2>&1
 
     head -n 10 debian/changelog
@@ -73,7 +89,7 @@ function build()
 
    # Move files to a tmp folder
    echo "> Exporting in $TMP_FOLDER ...  "
-   git ls-files | xargs tar -czf archive.tar.gz 
+   git ls-files | xargs tar -czf archive.tar.gz
    cat archive.tar.gz | tar -xz -C $TMP_FOLDER
    rm archive.tar.gz
 
