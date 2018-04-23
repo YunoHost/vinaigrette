@@ -3,7 +3,7 @@ Label: YunoHost for Jessie
 Suite: stable
 Codename: jessie
 Version: 8.0
-Architectures: i386 amd64 armel armhf source
+Architectures: i386 amd64 armel armhf arm64 source
 Components: stable testing unstable extra
 AlsoAcceptFor: jessie-stable jessie-testing jessie-unstable stable testing unstable
 Update: jessie-stable jessie-testing
@@ -18,7 +18,7 @@ Label: YunoHost for Stretch
 Suite: testing
 Codename: stretch
 Version: 9.0
-Architectures: i386 amd64 armel armhf source
+Architectures: i386 amd64 armel armhf arm64 source
 Components: stable testing unstable extra
 AlsoAcceptFor: stretch-stable stretch-testing stretch-unstable stable testing unstable
 Description: YunoHost repository for Debian Stretch
