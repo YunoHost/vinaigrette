@@ -13,6 +13,7 @@ VINAIGRETTE_HOME="/home/vinaigrette"
 cd $VINAIGRETTE_HOME
 source config/config
 
+ln -s /root/keys config/keys
 gpg --import config/keys/$DEBSIGN_KEYID.key
 gpg --import config/keys/$DEBSIGN_KEYID.pub
 
