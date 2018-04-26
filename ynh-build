@@ -137,6 +137,13 @@ function main()
 
     validate_arguments
 
+    if [[ "$(tty)" == "not a tty" ]]
+    then
+        echo "You aint in a tty (are you in a 'lxc exec' ?)"
+        echo "The script can't run because pbuilder won't be happy :|"
+        exit
+    fi
+
     # Sum up configuration
     echo "########################################################"
     echo "# Building $PROJECT $BRANCH release - $VERSION version  "
