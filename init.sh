@@ -25,9 +25,6 @@ git clone https://github.com/yunohost/metronome
 git clone https://github.com/vstakhov/rspamd
 
 cd yunohost
-git checkout stable   && git symbolic-ref refs/heads/jessie-stable refs/heads/stable
-git checkout testing  && git symbolic-ref refs/heads/jessie-testing refs/heads/testing
-git checkout unstable && git symbolic-ref refs/heads/jessie-unstable refs/heads/unstable
 git checkout stretch  && git symbolic-ref refs/heads/stretch-unstable refs/heads/stretch
 cd ..
 

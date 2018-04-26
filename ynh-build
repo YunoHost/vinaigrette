@@ -23,7 +23,7 @@ Usage:
 Arguments:
   <project>     moulinette, yunohost, yunohost-admin or SSOwat
   <branch>      testing or stable
-  <distrib>     jessie or stretch
+  <distrib>     stretch (can only build for stretch, no jessie)
   <version>     x.y.z (ex: 2.6.1)
 
 EOF
@@ -51,7 +51,7 @@ function validate_arguments()
     fi
 
     # Distribution
-    if [[ ! $DISTRIB =~ ^jessie|stretch$ ]]; then
+    if [[ ! $DISTRIB =~ ^stretch$ ]]; then
         echo "Invalid distribution $DISTRIB"
         usage
         exit 3
