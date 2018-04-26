@@ -1,0 +1,40 @@
+#!/bin/bash
+
+readonly DISTRIB=stretch
+readonly INIT_DIR=$PWD
+readonly ARCHS="amd64 i386 armhf armel arm64"
+
+function main()
+{
+    for ARCH in $ARCHS
+    do
+        build_image $ARCH
+    done
+}
+
+function build_image()
+{
+    local ARCH=$1
+    local CHROOT=chroot-${DISTRIB}-${ARCH}
+
+    cd /tmp/
+    cdebootstrap --arch=${ARCH} --foreign ${DISTRIB} ./$CHROOT http://deb.debian.org/debian/
+    cp /usr/bin/qemu-arm-static $CHROOT/usr/bin/
+    cp /usr/bin/qemu-aarch64-static $CHROOT/usr/bin/
+    cp /etc/resolv.conf $CHROOT/etc/resolv.conf 
+
+    chroot $CHROOT apt-get update
+    chroot $CHROOT apt-get dist-upgrade
+    chroot $CHROOT apt-get install -y build-essential debhelper cmake wget
+
+    chroot $CHROOT wget -q -O /tmp/setup_nodejs https://deb.nodesource.com/setup_4.x
+    chroot $CHROOT bash /tmp/setup_nodejs
+    chroot $CHROOT apt-get install -y nodejs
+
+    chroot $CHROOT apt-get clean
+
+    cd $CHROOT
+    tar -czf $INIT_DIR/${DISTRIB}-${ARCH}.tgz ./*
+}
+
+main

@@ -41,7 +41,6 @@ CONFIGFILE=""
 # Use specific conf for nodejs builds
 if [[ $package == "yunohost-admin" ]];
 then
-    BASE_TGZ="${PBUILDER_IMAGES}/${arch}/${codename}-nodejs.tgz"
     CONFIGFILE="--configfile $PBUILDER_CONF/nodejs.conf"
 fi
         
