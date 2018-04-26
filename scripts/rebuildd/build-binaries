@@ -50,6 +50,11 @@ then
    CONFIGFILE="--configfile $PBUILDER_CONF/armhf.conf"
 fi
 
+if [[ $arch == "armel" ]];
+then
+   CONFIGFILE="--configfile $PBUILDER_CONF/armel.conf"
+fi
+
 if [[ $arch == "arm64" ]];
 then
    CONFIGFILE="--configfile $PBUILDER_CONF/arm64.conf"

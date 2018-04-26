@@ -10,11 +10,11 @@ REPO_URL="forge.yunohost.org"
 
 # Codenames, components and architectures
 
-AVAILABLE_CODENAMES="jessie stretch"
+AVAILABLE_CODENAMES="stretch"
 AVAILABLE_COMPONENTS="stable testing unstable extra"
-AVAILABLE_ARCH="amd64 i386 armhf"
+AVAILABLE_ARCH="amd64 i386 armel armhf arm64"
 
-DEFAULT_CODENAME="jessie"
+DEFAULT_CODENAME="stretch"
 DEFAULT_COMPONENT="unstable"
 DEFAULT_ARCH="amd64"
 
@@ -22,7 +22,7 @@ DEFAULT_ARCH="amd64"
 
 HOME_VINAIGRETTE="/home/vinaigrette"
 GIT_REPOS="$HOME_VINAIGRETTE/gitrepos/"
-REPO_DIR=/var/www/repo/debian
+REPO_DIR="/var/www/repo/debian"
 
 PBUILDER_HOME="$HOME_VINAIGRETTE/scripts/pbuilder/"
 PBUILDER_IMAGES="$HOME_VINAIGRETTE/images/"
