@@ -6,7 +6,7 @@ DEBSIGN_KEYID=59A3E6FF
 DEBFULLNAME="YunoHost Contributors"
 DEBEMAIL="contrib@yunohost.org"
 MAIL="rebuildd@yunohost.org"
-REPO_URL="vinaigrette.yunohost.org"
+REPO_URL="forge.yunohost.org"
 
 # Codenames, components and architectures
 
