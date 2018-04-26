@@ -116,3 +116,5 @@ fi
 #fi
 
 echo "Build will start soon. See http://$REPO_URL"
+
+sendxmpppy "Launched build ${package}/${version} for ${CODENAME}/${COMPONENT}."

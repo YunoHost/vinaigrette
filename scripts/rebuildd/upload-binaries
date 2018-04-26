@@ -78,8 +78,6 @@ fi
 
 export HOME=$HOME_PBUILDER
 
-xmpp_msg="[rebuildd] Completed build of ${package}/${version} in ${COMPONENT} for ${CODENAME}/${arch}. See http://$REPO_URL/dist/${CODENAME}/arch/${arch}"
-
-sendxmpppy "$xmpp_msg"
+sendxmpppy "Completed build of ${package}/${version} for ${CODENAME}/${COMPONENT}/${arch}."
 
 exit $status
