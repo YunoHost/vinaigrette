@@ -58,12 +58,3 @@ echo "127.0.0.1 $REPO_URL" >> /etc/hosts
 service nginx reload
 
 rebuildd init
-
-#cd $VINAIGRETTE_HOME/webhooks
-#virtualenv venv
-#source venv/bin/activate
-#pip install -r requirements.txt
-#cp $VINAIGRETTE_HOME/webhooks/service /etc/init.d/github-webhook
-#systemctl daemon-reload
-#updated-rc.d github-webhook defaults
-#github-webhook
