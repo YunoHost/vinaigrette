@@ -29,11 +29,14 @@ function build_image()
 
     chroot $CHROOT apt-get update
     chroot $CHROOT apt-get dist-upgrade
-    chroot $CHROOT apt-get install -y build-essential debhelper cmake wget
+    chroot $CHROOT apt-get install -y build-essential debhelper cmake wget devscripts
 
-    chroot $CHROOT wget -q -O /tmp/setup_nodejs https://deb.nodesource.com/setup_4.x
-    chroot $CHROOT bash /tmp/setup_nodejs
-    chroot $CHROOT apt-get install -y nodejs
+    if [ "$ARCH" == "amd64" ];
+    then
+        chroot $CHROOT wget -q -O /tmp/setup_nodejs https://deb.nodesource.com/setup_4.x
+        chroot $CHROOT bash /tmp/setup_nodejs
+        chroot $CHROOT apt-get install -y nodejs
+    fi
 
     chroot $CHROOT apt-get clean
 
