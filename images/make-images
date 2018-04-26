@@ -17,6 +17,10 @@ function build_image()
     local ARCH=$1
     local CHROOT=chroot-${DISTRIB}-${ARCH}
 
+    echo ""
+    echo "Starting build for $ARCH"
+    echo ""
+
     cd /tmp/
     cdebootstrap --arch=${ARCH} --foreign ${DISTRIB} ./$CHROOT http://deb.debian.org/debian/
     cp /usr/bin/qemu-arm-static $CHROOT/usr/bin/
@@ -35,6 +39,10 @@ function build_image()
 
     cd $CHROOT
     tar -czf $INIT_DIR/${DISTRIB}-${ARCH}.tgz ./*
+
+    echo ""
+    echo "Output image should be available as $INIT_DIR/${DISTRIB}-${ARCH}.tgz"
+    echo ""
 }
 
 main

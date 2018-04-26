@@ -34,7 +34,7 @@ echo "######################"
 # Format needed pbuilder arguments
 DEBBUILDOPTS="$DEBBUILDOPTS -j$JOBS"
 DSC_FILE="${package}_${version}.dsc"
-BASE_TGZ="${PBUILDER_IMAGES}/${arch}/${codename}.tgz"
+BASE_TGZ="${PBUILDER_IMAGES}/${codename}-${arch}.tgz"
 EXTRA_OPTS=()
 CONFIGFILE=""
 

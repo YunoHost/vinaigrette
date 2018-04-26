@@ -92,7 +92,7 @@ echo "Building source package of ${package}_${version}..."
 if $BUILD_SRC_LOCALLY; then
     debuild -S -sa > /dev/null
 else
-    img="${PBUILDER_IMAGES}/amd64/${CODENAME}.tgz"
+    img="${PBUILDER_IMAGES}/${CODENAME}-amd64.tgz"
     sudo pbuilder execute --bindmounts ${ROOT_DIR} \
         --basetgz ${img} -- ${BUILD_SOURCES} $PKG_DIR
 fi

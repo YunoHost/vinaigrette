@@ -16,6 +16,7 @@ source config/config
 gpg --import config/keys/$DEBSIGN_KEYID.key
 gpg --import config/keys/$DEBSIGN_KEYID.pub
 
+mkdir gitrepos
 cd gitrepos/
 git clone https://github.com/yunohost/yunohost
 git clone https://github.com/yunohost/yunohost-admin
