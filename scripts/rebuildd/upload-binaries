@@ -1,6 +1,7 @@
 #!/bin/bash -p
 
 codename=$1
+CODENAME=$1
 package=$2
 version=$3
 arch=$4
@@ -8,13 +9,6 @@ job=$5
 
 source /home/vinaigrette/config/config
 source /home/vinaigrette/scripts/package_helpers.sh
-XMPP_BOT_KEY=$(cat /home/vinaigrette/config/keys/xmppbotkey)
-
-# Repository codename to add package to
-CODENAME=
-
-# Either adding package to rpi repo or not
-ADD_TO_RPI=false
 
 # Architecture independent packages are built on default arch
 ARCH=$arch
@@ -28,12 +22,6 @@ DISTRIBUTION=$(get_distribution $CHANGES_FILE)
 
 # Attempt to extract Debian codename from Distribution
 extract_codename_distribution $DISTRIBUTION || exit 1
-[ -z "$CODENAME" ] && CODENAME=$1
-
-# Add to rpi
-#if [[ $4 == all ]] && [[ $DISTRIBUTION != unstable ]]; then
-#    ADD_TO_RPI=true
-#fi
 
 # Retrieving component from source package
 get_source_component() {
@@ -46,9 +34,9 @@ if [ -z "$COMPONENT" ]; then
     exit 1
 fi
 
-echo \
-"******************************************************************************"
-echo "Adding binary package..."
+echo "#########################"
+echo " Adding binary package..."
+echo "#########################"
 
 include_to() {
     # Include changes to the given repo (waiting 1m max)
@@ -57,11 +45,8 @@ include_to() {
         $CHANGES_FILE > /dev/null 1>&1 || return 1
 }
 
-status=0
 if include_to $CODENAME ; then
-    if $ADD_TO_RPI; then
-        include_to "${CODENAME}/rpi" || status=1
-    fi
+    status=0
 else
     status=1
 fi
