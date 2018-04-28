@@ -25,6 +25,7 @@ git clone https://github.com/yunohost/ssowat SSOwat
 git clone https://github.com/yunohost/moulinette
 git clone https://github.com/yunohost/metronome
 git clone https://github.com/vstakhov/rspamd
+git clone https://git.donarmstrong.com/unscd.git
 
 cd yunohost
 git checkout stretch  && git symbolic-ref refs/heads/stretch-unstable refs/heads/stretch

@@ -56,13 +56,13 @@ function build_if_needed()
     git checkout $BRANCH_NIGHTLY_GIT >/dev/null 2>/dev/null
     if [ -z "$(git log ${BRANCH_NIGHTLY_GIT}..origin/${BRANCH_NIGHTLY_GIT})" ]; then
         echo "Sources up-to-date, nothing to build."
-        return
+        #return
     fi
     git pull origin $BRANCH_NIGHTLY_GIT >/dev/null
 
 
     VERSION=$(dpkg-parsechangelog -S Version 2>/dev/null)
-    VERSION_NIGHTLY="${VERSION}~${TIMETAG}"
+    VERSION_NIGHTLY="${VERSION}+${TIMETAG}"
 
     # Tweak the changelog temporarily
     echo "> Setting version in changelog to ${VERSION_NIGHTLY}"

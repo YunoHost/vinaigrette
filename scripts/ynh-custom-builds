@@ -20,7 +20,7 @@ function build_metronome()
 {
     local PACKAGE="metronome"
     # For some reason metronome version must include a revision ("-x")
-    local VERSION="3.7.10${YUNOHOST_PREFIX}${YUNOHOST_REVISION}"
+    local VERSION="3.8.13${YUNOHOST_PREFIX}${YUNOHOST_REVISION}"
 
     build $PACKAGE $VERSION
 }
