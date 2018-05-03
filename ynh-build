@@ -5,7 +5,7 @@ readonly PROJECT=$1
 readonly BRANCH=$2
 readonly DISTRIB=$3
 readonly VERSION=$4
-readonly TAG="debian/$VERSION"
+readonly TAG=$(echo "debian/$VERSION" | tr '~' '-')
 
 source /home/vinaigrette/config/config
 
@@ -76,8 +76,7 @@ function checkout_tag()
     git fetch --quiet
     git fetch --tags --quiet
     git checkout $DISTRIB-$BRANCH --quiet
-    #git checkout $BRANCH --quiet
-    #git pull origin $BRANCH --quiet
+    git reset --hard origin/$DISTRIB-$BRANCH --quiet
 
     LASTVERSIONCHANGELOG=$(dpkg-parsechangelog -S Version 2>/dev/null)
 

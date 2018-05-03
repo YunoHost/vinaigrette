@@ -33,7 +33,7 @@ EOF
 
 function main()
 {
-    validate_argument
+    validate_arguments
     retrieve_package_info
     build_sources
     add_to_reprepro
@@ -87,6 +87,7 @@ function retrieve_package_info()
 
 function build_sources()
 {
+    echo "---------------------------------------------------"
     echo "Building source package of ${PACKAGE}_${VERSION}..."
     echo "---------------------------------------------------"
 
@@ -100,6 +101,7 @@ function build_sources()
 
 function add_to_reprepro()
 {
+    echo "---------------------------------------------------"
     echo "Adding ${PACKAGE}_${VERSION} to ${DISTRIB}/${BRANCH}..."
     echo "---------------------------------------------------"
     $INCLUDE_CHANGES $DISTRIB $BRANCH $CHANGES_FILE
