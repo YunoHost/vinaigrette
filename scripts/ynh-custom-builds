@@ -5,8 +5,6 @@ readonly BRANCH="testing"
 readonly DISTRIB="stretch"
 readonly DEBIAN_BRANCH="testing"
 readonly BUILD_MESSAGE="YunoHost custom build."
-readonly YUNOHOST_PREFIX="+yunohost"
-readonly YUNOHOST_REVISION="-1"
 
 source /home/vinaigrette/config/config
 
@@ -14,17 +12,33 @@ function main()
 {
     build_metronome
     build_rspamd
+    build_unscd
 }
 
 function build_metronome()
 {
+
     local PACKAGE="metronome"
+
+    cd $GIT_REPOS/$PACKAGE
+
     # For some reason metronome version must include a revision ("-x")
-    local VERSION="3.8.13${YUNOHOST_PREFIX}${YUNOHOST_REVISION}"
+    local VERSION="$(dpkg-parsechangelog -S Version 2>/dev/null)+yunohost-1"
 
     build $PACKAGE $VERSION
 }
 
+function build_unscd()
+{
+
+    local PACKAGE="unscd"
+
+    cd $GIT_REPOS/$PACKAGE
+
+    local VERSION="$(dpkg-parsechangelog -S Version 2>/dev/null)+yunohost"
+
+    build $PACKAGE $VERSION
+}
 
 function build_rspamd()
 {
@@ -36,7 +50,7 @@ function build_rspamd()
 
     # Get last tag and deduce version number to user...
     local LASTTAG=$(git tag --list | grep "^1." | sort -n | tail -n1)
-    local VERSION="${LASTTAG}${YUNOHOST_PREFIX}"
+    local VERSION="${LASTTAG}+yunohost"
     git checkout $LASTTAG
 
     build $PACKAGE $VERSION
@@ -49,7 +63,7 @@ function build()
 
     # SVERSION is VERSION without the -1 at the end ...
     local SVERSION=$(echo $VERSION | tr '-' ' ' | awk '{print $1}')
-    
+
     cd $GIT_REPOS/$PACKAGE
 
     # Tweak the changelog temporarily
@@ -61,7 +75,7 @@ function build()
 	-v "${VERSION}" \
 	-D "${DEBIAN_BRANCH}" \
 	--force-distribution \
-	$BUILD_MESSAGE \ 
+	$BUILD_MESSAGE \
         > /dev/null 2>&1
 
     # Create temporary folder
@@ -69,9 +83,9 @@ function build()
 
     # Extract git archive a desired tag
     echo "> Exporting in $TMP_FOLDER ...  "
-    git ls-files | xargs tar -czf archive.tar.gz 
+    git ls-files | xargs tar -czf archive.tar.gz
     cat archive.tar.gz | tar -xz -C $TMP_FOLDER
-    # For some reason, these wants archive named 
+    # For some reason, these wants archive named
     # e.g. metronome_x.y.z+stuff.orig.tar.gz
     # in the parent folder...
     mv archive.tar.gz $TMP_FOLDER/../${PACKAGE}_${SVERSION}.orig.tar.gz
