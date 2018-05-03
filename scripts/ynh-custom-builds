@@ -93,8 +93,9 @@ function build()
     # Build Debian package
     echo "> Starting build ..."
     cd $TMP_FOLDER
-    $BUILD_DEB -d $BRANCH -c $DISTRIB .    # Restore changelog
+    $BUILD_DEB $DISTRIB $BRANCH .
 
+    # Restore changelog
     echo "> Restoring previous changelog"
     cd $GIT_REPOS/$PACKAGE
     cp debian/changelog.old debian/changelog

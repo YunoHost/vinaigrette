@@ -103,7 +103,7 @@ function build()
    # Build Debian package
    echo "> Starting build ..."
    cd $TMP_FOLDER
-   $BUILD_DEB -d $BRANCH_NIGHTLY -c $DISTRIB .
+   $BUILD_DEB $DISTRIB $BRANCH_NIGHTLY .
 }
 
 main

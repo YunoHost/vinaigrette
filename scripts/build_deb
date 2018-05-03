@@ -1,120 +1,112 @@
 #!/bin/bash
 
-# Default options values
-## Either building source in a chroot env or not
-BUILD_SRC_LOCALLY=false
+readonly THISSCRIPT=$0
+readonly DISTRIB=$1
+readonly BRANCH=$2
+readonly FOLDER=$3
 
-## Debian distribution to use
-CODENAME=
-DISTRIBUTION=
-
-# Global and environment variables
 source /home/vinaigrette/config/config
 export DEBSIGN_KEYID
 export DEBFULLNAME
 export DEBEMAIL
 
-usage()
+IMG="${PBUILDER_IMAGES}/${DISTRIB}-amd64.tgz"
+
+# ##### #
+# Usage #
+# ##### #
+
+function usage()
 {
-cat << EOF
-Usage: `basename $0` [options] DIR
+    cat << EOF
 
-ARGUMENTS:
-   DIR     Root directory of the package to build
+Usage:
+  $THISSCRIPT <distrib> <branch> <folder>
 
-OPTIONS:
-   -c CODENAME  Debian codename target
-                (one of: $AVAILABLE_CODENAMES)
-   -d COMPONENT Repository component to put package in
-                (one of: $AVAILABLE_COMPONENTS)
-   -l           Build sources locally (without pbuilder)
-   -h           Print this help
+Arguments:
+  <distrib>     stretch (can only build for stretch, no jessie)
+  <branch>      stable, testing, or unstable
+  <folder>      the folder in which to build...
 EOF
-exit
 }
 
-# Parse options
-while getopts :c:d:lh option; do
-    case "$option" in
-        c)
-            CODENAME=$OPTARG
-            ;;
-        d)
-            DISTRIBUTION=$OPTARG
-            ;;
-        l)
-            BUILD_SRC_LOCALLY=true
-            ;;
-        h)
-            usage
-            ;;
-        :)
-            echo "Option -$OPTARG requires an argument"
-            exit 1
-            ;;
-        \?)
-            echo "-$OPTARG: invalid option"
-            exit 1
-            ;;
-    esac
-done
 
-shift $((OPTIND-1))
+function main()
+{
+    validate_argument
+    retrieve_package_info
+    build_sources
+    add_to_reprepro
 
-# Parse DIR argument
-if [ $# -ne 1 ]; then
-    echo -e "Error: Missing DIR argument\n"
-    usage
-fi
-PKG_DIR=$(readlink -fn $1)
-ROOT_DIR=$(readlink -fn ${PKG_DIR}/../)
+    echo "Build will start soon. See 'rebuildd-job list | tail'"
+    sendxmpppy "Launched build ${PACKAGE}/${VERSION} for ${DISTRIB}/${BRANCH} ..."
+}
 
-# Retrieve package info
-cd $PKG_DIR
-package=$(dpkg-parsechangelog | awk '/^Source: / {print $2}')
-version=$(dpkg-parsechangelog | awk '/^Version: / {print $2}')
-distribution=$(dpkg-parsechangelog | awk '/^Distribution: / {print $2}')
+# ################# #
+# Check user inputs #
+# ################# #
 
-# Set and validate codename & distribution
-if [ -z "$CODENAME" ]; then
-    CODENAME=$DEFAULT_CODENAME
-elif ! [[ $AVAILABLE_CODENAMES =~ ^(.* |)$CODENAME( .*|)$ ]]; then
-    echo "Unmanaged codename '$CODENAME'"
-    exit 1
-fi
-if [ -z "$DISTRIBUTION" ]; then
-    extract_codename_distribution $distribution || exit 1
-fi
+function validate_arguments()
+{
+    # Distribution
+    if [[ ! $DISTRIB =~ ^stretch$ ]]; then
+        echo "Invalid distribution $DISTRIB"
+        usage
+        exit 1
+    fi
 
-changes_file=${ROOT_DIR}/${package}_${version}_source.changes
+    ## Branch
+    if [[ ! $BRANCH =~ ^testing|stable|unstable$ ]]; then
+        echo "Invalid branch $BRANCH"
+        usage
+        exit 2
+    fi
 
-echo "Building source package of ${package}_${version}..."
-if $BUILD_SRC_LOCALLY; then
-    debuild -S -sa > /dev/null
-else
-    img="${PBUILDER_IMAGES}/${CODENAME}-amd64.tgz"
-    sudo pbuilder execute --bindmounts ${ROOT_DIR} \
-        --basetgz ${img} -- ${BUILD_SOURCES} $PKG_DIR
-fi
-if [ $? -ne 0 ] || [ ! -f ${changes_file} ]; then
-    echo "An error occured while building source package"
-    exit 1
-fi
+    # Folder
+    if [ -z "$FOLDER" ]; then
+        echo "Need a folder in which to build"
+        usage
+        exit 3
+    fi
+}
 
-echo "Adding ${package}_${version} to ${CODENAME}/${DISTRIBUTION}..."
-$INCLUDE_CHANGES $CODENAME $DISTRIBUTION $changes_file
-if [ $? -ne 0 ]; then
-    echo "An error occured while including source package"
-    exit 1
-fi
+function retrieve_package_info()
+{
+    readonly PKG_DIR=$(readlink -fn $FOLDER)
+    readonly ROOT_DIR=$(readlink -fn ${PKG_DIR}/../)
+    cd $PKG_DIR
 
-#echo "Process incoming in repository..."
-#sudo reprepro -V -b $REPO_DIR processincoming incoming
-#if [ $? -ne 0 ]; then
-#    echo "An error occured while processing incoming"
-#    exit 1
-#fi
+    readonly PACKAGE=$(dpkg-parsechangelog | awk '/^Source: / {print $2}')
+    readonly VERSION=$(dpkg-parsechangelog | awk '/^Version: / {print $2}')
+    readonly CHANGES_FILE=${ROOT_DIR}/${PACKAGE}_${VERSION}_source.changes
+}
 
-echo "Build will start soon. See http://$REPO_URL"
+# ######################################## #
+# Invoke pbuilder to build the sources ... #
+# ######################################## #
 
-sendxmpppy "Launched build ${package}/${version} for ${CODENAME}/${DISTRIBUTION} ..."
+function build_sources()
+{
+    echo "Building source package of ${PACKAGE}_${VERSION}..."
+    echo "---------------------------------------------------"
+
+    sudo pbuilder execute --bindmounts ${ROOT_DIR} --basetgz ${IMG} -- ${BUILD_SOURCES} $PKG_DIR
+
+    if [ $? -ne 0 ] || [ ! -f ${CHANGES_FILE} ]; then
+        echo "An error occured while building source package"
+        exit 1
+    fi
+}
+
+function add_to_reprepro()
+{
+    echo "Adding ${PACKAGE}_${VERSION} to ${DISTRIB}/${BRANCH}..."
+    echo "---------------------------------------------------"
+    $INCLUDE_CHANGES $DISTRIB $BRANCH $CHANGES_FILE
+    if [ $? -ne 0 ]; then
+        echo "An error occured while including source package"
+        exit 1
+    fi
+}
+
+main

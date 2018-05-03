@@ -122,7 +122,7 @@ function build()
    echo "# Building Debian package ... #"
    echo "###############################"
    cd $TMP_FOLDER
-   $BUILD_DEB -d $BRANCH -c $DISTRIB .
+   $BUILD_DEB $DISTRIB $BRANCH .
 }
 
 
