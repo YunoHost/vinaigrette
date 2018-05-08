@@ -65,15 +65,13 @@ At the start of the build, pbuilder will call the hooks in scripts/pbuilder/hook
 
 #### If you need to rebuild custom packages (for instance, metronome ?)
 
-- Go to a git clone of https://github.com/yunohost/metronome/
-- Inside the git clone, call `/path/to/build_deb -c jessie -d unstable .`
-- This will build the source and add a rebuildd job.
+- See scripts/ynh-custom-builds
 
 #### Chroot images
 
 - To build stuff, pbuilder needs to chroot in environnement.
-- These are contained in `images/$arch/$dist.tgz`
-- You may be able to regerate them 'from scratch' with `rebuildd-init-build-system`. Not sure entirely how this works though. I guess it reads distributions and archs from conf file ?
+- These are contained in `images/$dist-$arch.tgz`
+- You can rebuild them from `images/make-images`
 
 #### 'Packages' are generally 'source packages' for debian people
 
@@ -91,7 +89,18 @@ Interesting note from [this page](http://tldp.org/HOWTO/html_single/Debian-Binar
 - cd /var/cache/rebuildd/build/
 - /home/vinaigrette/scripts/rebuildd/build-binaries stretch rspamd 1.6.4 armhf
 
+#### Removing "conflicting" sources
 
+- Sometimes reprepro is an ass and wont let you add some sources because a
+  supposedly more recent version already exists
+- To make it happy, you can use the undocumented `removesrc` feature :
+
+```
+reprepro removesrc <codename> <source-package-names> [<source-version>]
+
+# For instance
+ reprepro removesrc stretch yunohost-admin 3.0.0+201804281857
+```
 
 
 
