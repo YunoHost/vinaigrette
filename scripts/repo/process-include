@@ -38,8 +38,7 @@ fi
 
 # Kick off the job
 for a in $arch; do
-    # package_name package_version priority dist_name arch mail
-    echo "$package $version 1 $codename $a $MAIL" | sudo rebuildd-job add
+    sudo /home/vinaigrette/scripts/rebuildd-job add $package $version $codename $a
 done
 
 exit 0

@@ -66,6 +66,6 @@ def add_():
     parser.add_argument('arch')
     args = parser.parse_args(sys.argv[2:])
     
-    Rebuildd().add_job(args.package, args.version, 10, args.dist, mailto=None, arch=args.arch)
+    Rebuildd().add_job(args.package, args.version, "10", args.dist, mailto=None, arch=args.arch)
 
 main()
