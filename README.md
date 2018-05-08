@@ -102,7 +102,12 @@ reprepro removesrc <codename> <source-package-names> [<source-version>]
  reprepro removesrc stretch yunohost-admin 3.0.0+201804281857
 ```
 
+### What do I do if a job crashed for some weird reason ?
 
+Sometimes build crash for random reason and just relaunching them fixes the
+situation. But since that would be too simple, you can't just use the standard
+'requeue' action of the `rebuildd-job` command because your job will end up in
+WAIT_LOCKED indifinetely -.- ...
 
-
-
+Instead, you can re-add the job for the corresponding architecture. See
+`./scripts/rebuildd-job add --help`.
