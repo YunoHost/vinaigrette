@@ -5,6 +5,7 @@ readonly BRANCH_NIGHTLY="unstable"
 readonly DISTRIB="stretch"
 readonly TIMETAG="$(date +%Y%m%d%H%M)"
 readonly PACKAGES="moulinette SSOwat yunohost yunohost-admin"
+readonly FORCE="false"
 
 source /home/vinaigrette/config/config
 
@@ -42,7 +43,7 @@ function build_if_needed()
     # Check if there's a branch named distrib-branch (e.g. stretch-unstable)
     # By default, keep just 'branch'
     BRANCH_NIGHTLY_GIT="$BRANCH_NIGHTLY"
-    if git branch --list | awk '{print $1}' | grep -q "^$DISTRIB-$BRANCH_NIGHTLY$"
+    if git branch --list | tr '*' ' ' | awk '{print $1}' | grep -q "^$DISTRIB-$BRANCH_NIGHTLY$"
     then
 	    BRANCH_NIGHTLY_GIT="$DISTRIB-$BRANCH_NIGHTLY"
     fi
@@ -55,11 +56,17 @@ function build_if_needed()
 
     git checkout $BRANCH_NIGHTLY_GIT >/dev/null 2>/dev/null
     if [ -z "$(git log ${BRANCH_NIGHTLY_GIT}..origin/${BRANCH_NIGHTLY_GIT})" ]; then
-        echo "Sources up-to-date, nothing to build."
-        #return
+	if ! "$FORCE";
+	then
+		echo "Sources up-to-date, nothing to build."
+		return
+	else
+		echo "Sources up-to-date but forcing build anyway."
+	fi
     fi
-    git pull origin $BRANCH_NIGHTLY_GIT >/dev/null
 
+    git pull origin $BRANCH_NIGHTLY_GIT >/dev/null
+    git reset --hard origin/$BRANCH_NIGHTLY_GIT
 
     VERSION=$(dpkg-parsechangelog -S Version 2>/dev/null)
     VERSION_NIGHTLY="${VERSION}+${TIMETAG}"
