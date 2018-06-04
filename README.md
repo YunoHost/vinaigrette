@@ -3,20 +3,10 @@ Vinaigrette
 
 Build those damn .deb's
 
-Todo
------
+How this shit works
+-------------------
 
-- [ ] Understand how the whole arch shit works
-	- When do we need a specific arch (e.g. armhf) build ? (e.g. for pure python stuff we don't care, but probably for C/C++ we do ?)
-	- How does it actually works (debootstrap stuff ?)
-	- How do we manage extra archs like armel, arm64 ...?
-
-- [ ] Test repo in practice
-	- Dummy tests when using vinaigrette.yunohost.org in sources.list
-	- Test metronome on arm ?
-	- Test stretch builds 
-
-- [ ] Moar cleaning of scripts (e.g. specific arch argument in `build_deb` ?)
+![](doc/buildchain.png)
 
 Content
 -------
@@ -50,11 +40,6 @@ Useful commands
 - `rebuildd` starts the rebuildd server/daemon - for now I have to start it manually and `disown` it. The service should be working but there's some weird stuff about lxc making it crashed ?
 - `rebuildd-httpd 127.0.0.1:9998` starts the monitoring/log web interface - same as `rebuildd`, gotta start it manually for now :/
 - in `/var/www/repo/debian`, you can list available packages with `reprepro list jessie`
-
-How this shit works
--------------------
-
-![](doc/buildchain.png)
 
 Misc notes
 ----------
