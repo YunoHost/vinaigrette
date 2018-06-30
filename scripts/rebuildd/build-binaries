@@ -5,6 +5,8 @@ package=$2
 version=$3
 arch=$4
 
+sendxmpppy "Starting build ${package}/${version} for $arch ..."
+
 source /home/vinaigrette/config/config
 source /home/vinaigrette/scripts/package_helpers.sh
 
@@ -67,5 +69,10 @@ pbuilder build                            \
 	 $DSC_FILE
 
 exit_code=$?
+
+if [[ $exit_code != 0 ]];
+then
+	sendxmpppy "Building ${package}/${version} for $arch failed ?!"
+fi
 
 exit $exit_code
