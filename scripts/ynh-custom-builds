@@ -1,88 +1,100 @@
 #!/bin/bash
 
 readonly THISSCRIPT=$0
-readonly BRANCH="testing"
+readonly PACKAGE=$1
+readonly BRANCH=$2
 readonly DISTRIB="stretch"
-readonly DEBIAN_BRANCH="testing"
-readonly BUILD_MESSAGE="YunoHost custom build."
 
 source /home/vinaigrette/config/config
+source /home/vinaigrette/scripts/common.sh
+
+# ##### #
+# Usage #
+# ##### #
+
+function usage()
+{
+    cat << EOF
+
+Usage:
+  $THISSCRIPT <project> <branch> <version>
+
+Arguments:
+  <project>     metronome, rspamd or unscd
+  <branch>      stable, testing or unstable
+
+EOF
+}
 
 function main()
 {
-    build_metronome
-    build_rspamd
-    build_unscd
+    validate_arguments
+    cd $GIT_REPOS/$PACKAGE
+    tweak_$PACKAGE
+    build
 }
 
-function build_metronome()
+# ################# #
+# Check user inputs #
+# ################# #
+
+function validate_arguments()
 {
+    [[ $PACKAGE =~ ^metronome|rspamd|unscd$ ]] || critical "Invalid package $PACKAGE"
+    [[ $BRANCH =~ ^testing|stable|unstable$ ]] || critical "Invalid branch $BRANCH"
+    [[ "$(tty)" != "not a tty" ]] || critical "You aint in a tty (are you in a 'lxc exec' ?) The script can't run because pbuilder won't be happy :|"
+}
 
-    local PACKAGE="metronome"
+# ##################### #
+# Build recipe / tweaks #
+# ##################### #
 
-    cd $GIT_REPOS/$PACKAGE
-
+function tweak_metronome()
+{
     # For some reason metronome version must include a revision ("-x")
-    local VERSION="$(dpkg-parsechangelog -S Version 2>/dev/null)+yunohost-1"
-
-    build $PACKAGE $VERSION
+    readonly VERSION="$(dpkg-parsechangelog -S Version 2>/dev/null)+yunohost-1"
 }
 
-function build_unscd()
+function tweak_unscd()
 {
-
-    local PACKAGE="unscd"
-
-    cd $GIT_REPOS/$PACKAGE
-
-    local VERSION="$(dpkg-parsechangelog -S Version 2>/dev/null)+yunohost"
-
-    build $PACKAGE $VERSION
+    readonly VERSION="$(dpkg-parsechangelog -S Version 2>/dev/null)+yunohost"
 }
 
-function build_rspamd()
+function tweak_rspamd()
 {
-    local PACKAGE="rspamd"
-
-    cd $GIT_REPOS/$PACKAGE
     git checkout master
     git pull origin master
 
     # Get last tag and deduce version number to user...
     local LASTTAG=$(git tag --list | grep "^1." | sort -n | tail -n1)
-    local VERSION="${LASTTAG}+yunohost"
+    readonly VERSION="${LASTTAG}+yunohost"
     git checkout $LASTTAG
-
-    build $PACKAGE $VERSION
 }
 
 function build()
 {
-    local PACKAGE=$1
-    local VERSION=$2
-
     # SVERSION is VERSION without the -1 at the end ...
     local SVERSION=$(echo $VERSION | tr '-' ' ' | awk '{print $1}')
 
     cd $GIT_REPOS/$PACKAGE
 
     # Tweak the changelog temporarily
-    echo "> Setting version in changelog to ${VERSION}"
+    info "Setting version in changelog to ${VERSION}"
     rm -f debian/changelog.dch
     cp debian/changelog debian/changelog.old
     dch --package "${PACKAGE}" \
         --force-bad-version \
 	-v "${VERSION}" \
-	-D "${DEBIAN_BRANCH}" \
+	-D "${BRANCH}" \
 	--force-distribution \
-	$BUILD_MESSAGE \
+	"YunoHost custom build." \
         > /dev/null 2>&1
 
     # Create temporary folder
     TMP_FOLDER=$(mktemp -d)
 
     # Extract git archive a desired tag
-    echo "> Exporting in $TMP_FOLDER ...  "
+    info "Exporting in $TMP_FOLDER ...  "
     git ls-files | xargs tar -czf archive.tar.gz
     cat archive.tar.gz | tar -xz -C $TMP_FOLDER
     # For some reason, these wants archive named
@@ -91,15 +103,14 @@ function build()
     mv archive.tar.gz $TMP_FOLDER/../${PACKAGE}_${SVERSION}.orig.tar.gz
 
     # Build Debian package
-    echo "> Starting build ..."
     cd $TMP_FOLDER
     $BUILD_DEB $DISTRIB $BRANCH .
 
     # Restore changelog
-    echo "> Restoring previous changelog"
+    info "Restoring previous changelog"
     cd $GIT_REPOS/$PACKAGE
     cp debian/changelog.old debian/changelog
     rm debian/changelog.old
 }
 
-main
+[[ "$1" =~ ^-h|--help$ ]] && (usage; exit 0) || main

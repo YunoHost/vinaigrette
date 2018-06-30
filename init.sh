@@ -2,6 +2,7 @@
 apt-get install nginx pbuilder reprepro rebuildd gawk sendxmpp -y
 apt-get install qemu-system-arm debootstrap cdebootstrap qemu-user-static -y
 apt-get install python-virtualenv python3-pip -y
+apt-get install boxes -y
 
 # Fix the damn pbuilder-satistydepends (aptitude causes segfault on ARM)
 cd /usr/lib/pbuilder

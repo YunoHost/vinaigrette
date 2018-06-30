@@ -8,6 +8,7 @@ readonly VERSION=$4
 readonly TAG=$(echo "debian/$VERSION" | tr '~' '-')
 
 source /home/vinaigrette/config/config
+source /home/vinaigrette/scripts/common.sh
 
 # ##### #
 # Usage #
@@ -35,42 +36,17 @@ EOF
 
 function validate_arguments()
 {
-
-    ## Project
-    if [[ ! $PROJECT =~ ^yunohost|yunohost-admin|moulinette|SSOwat$ ]]; then
-        echo "Invalid project $PROJECT"
-        usage
-        exit 1
-    fi
-
-    ## Branch
-    if [[ ! $BRANCH =~ ^testing|stable|unstable$ ]]; then
-        echo "Invalid branch $BRANCH"
-        usage
-        exit 2
-    fi
-
-    # Distribution
-    if [[ ! $DISTRIB =~ ^stretch$ ]]; then
-        echo "Invalid distribution $DISTRIB"
-        usage
-        exit 3
-    fi
-
-    # Version
-    if [ -z "$VERSION" ]; then
-        echo "Invalid version $VERSION"
-        usage
-        exit 4
-    fi
+    [[ $PROJECT =~ ^yunohost|yunohost-admin|moulinette|SSOwat$ ]] || critical "Invalid project $PROJECT"
+    [[ $BRANCH =~ ^testing|stable|unstable$ ]] || critical "Invalid branch $BRANCH"
+    [[ $DISTRIB =~ ^stretch$ ]]; || critical "Invalid distribution $DISTRIB"
+    [[ ! -z "$VERSION" ]] || critical "Invalid version $VERSION"
+    [[ "$(tty)" != "not a tty" ]] || critical "You aint in a tty (are you in a 'lxc exec' ?) The script can't run because pbuilder won't be happy :|"
 }
 
 function checkout_tag()
 {
     # Update project's repository
-    echo ""
-    echo "> Updating $GIT_REPOS/$PROJECT repository ... "
-    echo ""
+    boxed "> Updating $GIT_REPOS/$PROJECT repository ... "
 
     cd $GIT_REPOS/$PROJECT
     git fetch --quiet
@@ -78,31 +54,18 @@ function checkout_tag()
     git checkout $DISTRIB-$BRANCH --quiet
     git reset --hard origin/$DISTRIB-$BRANCH --quiet
 
+    # Validate constrains for the version number given (is in changelog + has corresponding tag)
+
     LASTVERSIONCHANGELOG=$(dpkg-parsechangelog -S Version 2>/dev/null)
+    [[ "$VERSION" == "$LASTVERSIONCHANGELOG" ]] || critical "Version $VERSION is not the last version in changelog"
+    git rev-parse "$TAG" >/dev/null 2>&1 || critical "Invalid version $VERSION (there's no tag $TAG in the git repo !)"
 
-    if [[ "$VERSION" != "$LASTVERSIONCHANGELOG" ]]
-    then
-	echo "Version $VERSION is not the last version in changelog"
-	exit
-    fi
-
-    # Check if tag really exists
-    if ! git rev-parse "$TAG" >/dev/null 2>&1;
-    then
-        echo "Invalid version $VERSION (there's no tag $TAG in the git repo !)"
-        exit
-    fi
     # Get commit for the tag and for HEAD
+
     TAGCOMMIT=$(git rev-parse "$TAG")
     HEADCOMMIT=$(git rev-parse "HEAD")
 
-    if [[ "$TAGCOMMIT" != "$HEADCOMMIT" ]]
-    then
-        echo "Tag $TAG is not the HEAD of the branch :/"
-        exit
-    fi
-
-
+    [[ "$TAGCOMMIT" == "$HEADCOMMIT" ]] || critical "Tag $TAG is not the HEAD of the branch :/"
 }
 
 function build()
@@ -111,15 +74,11 @@ function build()
    TMP_FOLDER=$(mktemp -d)
 
    # Extract git archive a desired tag
-   echo ""
-   echo "> Exporting in $TMP_FOLDER ...  "
-   echo ""
+   info "Exporting in $TMP_FOLDER ...  "
    git archive $TAG --format=tar | tar -x -C $TMP_FOLDER
 
    # Build Debian package
-   echo "###############################"
-   echo "# Building Debian package ... #"
-   echo "###############################"
+   boxed "Building Debian package ... "
    cd $TMP_FOLDER
    $BUILD_DEB $DISTRIB $BRANCH .
 }
@@ -127,32 +86,13 @@ function build()
 
 function main()
 {
-
-    # If used asked for help, show usage
-    if [[ $1 == "-h" ]] || [[ $1 == "--help" ]]; then
-        usage
-        exit 0
-    fi
-
     validate_arguments
 
-    if [[ "$(tty)" == "not a tty" ]]
-    then
-        echo "You aint in a tty (are you in a 'lxc exec' ?)"
-        echo "The script can't run because pbuilder won't be happy :|"
-        exit
-    fi
-
-    # Sum up configuration
-    echo "########################################################"
-    echo "# Building $PROJECT $BRANCH release - $VERSION version  "
-    echo "########################################################"
+    boxed "Building $PROJECT $BRANCH release - $VERSION version"
 
     checkout_tag
     build
-
 }
 
-
-main
+[[ "$1" =~ ^-h|--help$ ]] && (usage; exit 0) || main
 

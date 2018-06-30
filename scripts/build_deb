@@ -6,11 +6,13 @@ readonly BRANCH=$2
 readonly FOLDER=$3
 
 source /home/vinaigrette/config/config
+source /home/vinaigrette/scripts/common.sh
+
 export DEBSIGN_KEYID
 export DEBFULLNAME
 export DEBEMAIL
 
-IMG="${PBUILDER_IMAGES}/${DISTRIB}-amd64.tgz"
+readonly IMG="${PBUILDER_IMAGES}/${DISTRIB}-amd64.tgz"
 
 # ##### #
 # Usage #
@@ -38,7 +40,7 @@ function main()
     build_sources
     add_to_reprepro
 
-    echo "Build will start soon. See 'rebuildd-job list | tail'"
+    success "Build will start soon. See 'rebuildd-job list | tail'"
     sendxmpppy "Added builds for ${PACKAGE}/${VERSION} in branch ${BRANCH} ..."
 }
 
@@ -48,26 +50,9 @@ function main()
 
 function validate_arguments()
 {
-    # Distribution
-    if [[ ! $DISTRIB =~ ^stretch$ ]]; then
-        echo "Invalid distribution $DISTRIB"
-        usage
-        exit 1
-    fi
-
-    ## Branch
-    if [[ ! $BRANCH =~ ^testing|stable|unstable$ ]]; then
-        echo "Invalid branch $BRANCH"
-        usage
-        exit 2
-    fi
-
-    # Folder
-    if [ -z "$FOLDER" ]; then
-        echo "Need a folder in which to build"
-        usage
-        exit 3
-    fi
+    [[ $DISTRIB =~ ^stretch$ ]] || critical "Invalid distribution $DISTRIB"
+    [[ $BRANCH =~ ^testing|stable|unstable$ ]] || critical "Invalid branch $BRANCH"
+    [[ ! -z "$FOLDER" ]] || critical "Need a folder in which to build"
 }
 
 function retrieve_package_info()
@@ -87,28 +72,19 @@ function retrieve_package_info()
 
 function build_sources()
 {
-    echo "---------------------------------------------------"
-    echo "Building source package of ${PACKAGE}_${VERSION}..."
-    echo "---------------------------------------------------"
+    boxed "Building source package of ${PACKAGE} ${VERSION} ..."
 
-    sudo pbuilder execute --bindmounts ${ROOT_DIR} --basetgz ${IMG} -- ${BUILD_SOURCES} $PKG_DIR
+    sudo pbuilder execute --bindmounts ${ROOT_DIR} --basetgz ${IMG} -- ${BUILD_SOURCES} $PKG_DIR \
+	    || critical "An error occured while building source package"
 
-    if [ $? -ne 0 ] || [ ! -f ${CHANGES_FILE} ]; then
-        echo "An error occured while building source package"
-        exit 1
-    fi
+    [[ -f ${CHANGES_FILE} ]] || critical "An error occured while building source package (no change file available)"
 }
 
 function add_to_reprepro()
 {
-    echo "---------------------------------------------------"
-    echo "Adding ${PACKAGE}_${VERSION} to ${DISTRIB}/${BRANCH}..."
-    echo "---------------------------------------------------"
-    $INCLUDE_CHANGES $DISTRIB $BRANCH $CHANGES_FILE
-    if [ $? -ne 0 ]; then
-        echo "An error occured while including source package"
-        exit 1
-    fi
+    boxed "Adding ${PACKAGE}_${VERSION} to ${DISTRIB}/${BRANCH}..."
+
+    $INCLUDE_CHANGES $DISTRIB $BRANCH $CHANGES_FILE || critical "An error occured while including source package"
 }
 
-main
+[[ "$1" =~ ^-h|--help$ ]] && (usage; exit 0) || main
