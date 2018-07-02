@@ -62,13 +62,7 @@ function tweak_unscd()
 
 function tweak_rspamd()
 {
-    git checkout master
-    git pull origin master
-
-    # Get last tag and deduce version number to user...
-    local LASTTAG=$(git tag --list | grep "^1." | sort -n | tail -n1)
-    readonly VERSION="${LASTTAG}+yunohost"
-    git checkout $LASTTAG
+    readonly VERSION="$(dpkg-parsechangelog -S Version 2>/dev/null)+yunohost"
 }
 
 function build()
