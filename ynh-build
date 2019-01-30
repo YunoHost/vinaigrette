@@ -3,8 +3,8 @@
 readonly THISSCRIPT=$0
 readonly PROJECT=$1
 readonly BRANCH=$2
-readonly DISTRIB=$3
-readonly VERSION=$4
+readonly DISTRIB="stretch"
+readonly VERSION=$3
 readonly TAG=$(echo "debian/$VERSION" | tr '~' '-')
 
 source /home/vinaigrette/config/config
@@ -24,7 +24,6 @@ Usage:
 Arguments:
   <project>     moulinette, yunohost, yunohost-admin or SSOwat
   <branch>      testing or stable
-  <distrib>     stretch (can only build for stretch, no jessie)
   <version>     x.y.z (ex: 2.6.1)
 
 EOF
@@ -38,7 +37,7 @@ function validate_arguments()
 {
     [[ $PROJECT =~ ^yunohost|yunohost-admin|moulinette|SSOwat$ ]] || critical "Invalid project $PROJECT"
     [[ $BRANCH =~ ^testing|stable|unstable$ ]] || critical "Invalid branch $BRANCH"
-    [[ $DISTRIB =~ ^stretch$ ]]; || critical "Invalid distribution $DISTRIB"
+    [[ $DISTRIB =~ ^stretch$ ]] || critical "Invalid distribution $DISTRIB"
     [[ ! -z "$VERSION" ]] || critical "Invalid version $VERSION"
     [[ "$(tty)" != "not a tty" ]] || critical "You aint in a tty (are you in a 'lxc exec' ?) The script can't run because pbuilder won't be happy :|"
 }
