@@ -93,5 +93,5 @@ function main()
     build
 }
 
-[[ "$1" =~ ^-h|--help$ ]] && (usage; exit 0) || main
+[[ "$1" =~ ^-h|--help$ ]] && usage || main
 
