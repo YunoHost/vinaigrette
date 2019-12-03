@@ -1,12 +1,12 @@
 Origin: YunoHost
-Label: YunoHost for Stretch
+Label: YunoHost for Buster
 Suite: stable
-Codename: stretch
+Codename: buster
 Version: 9.0
 Architectures: i386 amd64 armel armhf arm64 source
 Components: stable testing unstable extra
-AlsoAcceptFor: stretch-stable stretch-testing stretch-unstable stable testing unstable
-Description: YunoHost repository for Debian Stretch
+AlsoAcceptFor: buster-stable buster-testing buster-unstable stable testing unstable
+Description: YunoHost repository for Debian Buster
 SignWith: 59A3E6FF
 Tracking: all includechanges keepsources
 Log: logfile

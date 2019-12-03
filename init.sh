@@ -29,7 +29,7 @@ git clone https://github.com/YunoHost/rspamd
 git clone https://git.donarmstrong.com/unscd.git
 
 cd yunohost
-git checkout stretch  && git symbolic-ref refs/heads/stretch-unstable refs/heads/stretch
+git checkout buster  && git symbolic-ref refs/heads/buster-unstable refs/heads/buster
 cd ..
 
 mkdir -p /var/www/repo/debian/conf/
@@ -53,7 +53,7 @@ cat $VINAIGRETTE_HOME/config/sources.list > /etc/apt/sources.list.d/vinaigrette.
 
 sed -i "s/__REPO_URL__/$REPO_URL/g" /etc/nginx/sites-enabled/repo.conf
 sed -i "s/__REPO_URL__/$REPO_URL/g" /etc/apt/sources.list.d/vinaigrette.list
-echo "deb https://deb.nodesource.com/node_4.x stretch main" >> /etc/apt/sources.list
+echo "deb https://deb.nodesource.com/node_4.x buster main" >> /etc/apt/sources.list
 
 echo "127.0.0.1 $REPO_URL" >> /etc/hosts
 service nginx reload

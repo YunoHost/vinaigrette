@@ -3,7 +3,7 @@
 readonly THISSCRIPT=$0
 readonly PROJECT=$1
 readonly BRANCH=$2
-readonly DISTRIB="stretch"
+readonly DISTRIB="buster"
 readonly VERSION=$3
 readonly TAG=$(echo "debian/$VERSION" | tr '~' '-')
 
@@ -37,7 +37,7 @@ function validate_arguments()
 {
     [[ $PROJECT =~ ^yunohost|yunohost-admin|moulinette|SSOwat$ ]] || critical "Invalid project $PROJECT"
     [[ $BRANCH =~ ^testing|stable|unstable$ ]] || critical "Invalid branch $BRANCH"
-    [[ $DISTRIB =~ ^stretch$ ]] || critical "Invalid distribution $DISTRIB"
+    [[ $DISTRIB =~ ^buster|stretch$ ]] || critical "Invalid distribution $DISTRIB"
     [[ ! -z "$VERSION" ]] || critical "Invalid version $VERSION"
     [[ "$(tty)" != "not a tty" ]] || critical "You aint in a tty (are you in a 'lxc exec' ?) The script can't run because pbuilder won't be happy :|"
 }

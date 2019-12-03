@@ -1,6 +1,6 @@
 #!/bin/bash
 
-readonly DISTRIB=stretch
+readonly DISTRIB=buster
 readonly INIT_DIR=$PWD
 readonly ARCHS="amd64 i386 armhf armel arm64"
 

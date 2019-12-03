@@ -32,7 +32,7 @@ extract_codename_distribution()
         for p in `echo "$1" | tr "-" "\n"`; do
           case $i in
               0)
-                if [[ $p =~ ^stretch$ ]]; then
+                if [[ $p =~ ^buster$ ]]; then
                     CODENAME=$p
                 else
                     echo "invalid Debian codename $p"

@@ -72,7 +72,7 @@ Interesting note from [this page](http://tldp.org/HOWTO/html_single/Debian-Binar
 
 - Copy the 'shell after error' hook : `cp /usr/share/doc/pbuilder/examples/C10shell /home/vinaigrette/scripts/pbuilder/hooks/`
 - cd /var/cache/rebuildd/build/
-- /home/vinaigrette/scripts/rebuildd/build-binaries stretch rspamd 1.6.4 armhf
+- /home/vinaigrette/scripts/rebuildd/build-binaries buster rspamd 1.6.4 armhf
 
 #### Removing "conflicting" sources
 
@@ -84,7 +84,7 @@ Interesting note from [this page](http://tldp.org/HOWTO/html_single/Debian-Binar
 reprepro removesrc <codename> <source-package-names> [<source-version>]
 
 # For instance
- reprepro removesrc stretch yunohost-admin 3.0.0+201804281857
+ reprepro removesrc buster yunohost-admin 3.0.0+201804281857
 ```
 
 ### What do I do if a job crashed for some weird reason ?
