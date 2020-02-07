@@ -4,5 +4,5 @@ PBUILDER_BIN=/usr/sbin/pbuilder
 PBUILDER_CACHE_PATH="/var/cache/pbuilder"
 PBUILDER_MIRROR=https://ftp.debian.org/debian
 ARCHS="amd64 i386 armel armhf arm64"
-DISTS="stretch"
+DISTS="stretch buster"
 ENABLE_BUILDER_MAINT=1

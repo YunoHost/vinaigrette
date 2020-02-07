@@ -2,7 +2,7 @@
 
 readonly THISSCRIPT=$0
 readonly BRANCH_NIGHTLY="unstable"
-readonly DISTRIB="stretch"
+readonly DISTRIBS="buster"
 readonly TIMETAG="$(date +%Y%m%d%H%M)"
 readonly PACKAGES="moulinette SSOwat yunohost yunohost-admin"
 readonly FORCE="false"
@@ -21,11 +21,13 @@ function main()
 
     for PACKAGE in $PACKAGES;
     do
+	for DISTRIB in $DISTRIBS;
+	do
+		echo "-------------------------------------"
+		echo "Looking for update in ${PACKAGE} for ${DISTRIB}... "
 
-        echo "-------------------------------------"
-        echo "Looking for update in ${PACKAGE} ... "
-
-        build_if_needed $PACKAGE
+		build_if_needed $PACKAGE $DISTRIB
+	done
 
     done
     echo "-------------------------------------"
@@ -35,6 +37,7 @@ function main()
 function build_if_needed()
 {
     local PACKAGE=$1
+    local DISTRIB=$2
 
     cd $GIT_REPOS/$PACKAGE
 
@@ -43,13 +46,13 @@ function build_if_needed()
     # Check if there's a branch named distrib-branch (e.g. stretch-unstable)
     # By default, keep just 'branch'
     BRANCH_NIGHTLY_GIT="$BRANCH_NIGHTLY"
-    if git branch --list | tr '*' ' ' | awk '{print $1}' | grep -q "^$DISTRIB-$BRANCH_NIGHTLY$"
+    if git branch -ar | grep -q origin/$DISTRIB-$BRANCH_NIGHTLY
     then
 	    BRANCH_NIGHTLY_GIT="$DISTRIB-$BRANCH_NIGHTLY"
     fi
 
     # If the branch name is an alias to another branch, "resolve" the alias
-    if grep -q "ref: " .git/refs/heads/$BRANCH_NIGHTLY_GIT
+    if grep -q "ref: " .git/refs/heads/$BRANCH_NIGHTLY_GIT 2>/dev/null
     then
 	    BRANCH_NIGHTLY_GIT=$(cat .git/refs/heads/$BRANCH_NIGHTLY_GIT | tr '/' ' ' | awk '{print $4}')
     fi

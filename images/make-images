@@ -1,8 +1,10 @@
 #!/bin/bash
 
-readonly DISTRIB=stretch
+# For some reason, building images for buster from stretch requires libdebian-installer4 0.119 instead of 0.110, c.f. https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=904699 ... installed it by manually downloading and dpkg -i the .deb
+readonly DISTRIB=buster
 readonly INIT_DIR=$PWD
-readonly ARCHS="amd64 i386 armhf armel arm64"
+readonly ARCHS="amd64"
+#readonly ARCHS="amd64 i386 armhf armel arm64"
 
 function main()
 {
@@ -27,18 +29,19 @@ function build_image()
     cp /usr/bin/qemu-aarch64-static $CHROOT/usr/bin/
     cp /etc/resolv.conf $CHROOT/etc/resolv.conf 
 
-    chroot $CHROOT apt-get update
-    chroot $CHROOT apt-get dist-upgrade
-    chroot $CHROOT apt-get install -y build-essential debhelper cmake wget devscripts
+    chroot $CHROOT apt update
+    chroot $CHROOT apt dist-upgrade
+    chroot $CHROOT apt install -y build-essential debhelper cmake wget devscripts
 
     if [ "$ARCH" == "amd64" ];
     then
-        chroot $CHROOT wget -q -O /tmp/setup_nodejs https://deb.nodesource.com/setup_4.x
+        #chroot $CHROOT wget -q -O /tmp/setup_nodejs https://deb.nodesource.com/setup_4.x
+        chroot $CHROOT wget -q -O /tmp/setup_nodejs https://deb.nodesource.com/setup_6.x
         chroot $CHROOT bash /tmp/setup_nodejs
-        chroot $CHROOT apt-get install -y nodejs
+        chroot $CHROOT apt install -y nodejs
     fi
 
-    chroot $CHROOT apt-get clean
+    chroot $CHROOT apt clean
 
     cd $CHROOT
     tar -czf $INIT_DIR/${DISTRIB}-${ARCH}.tgz ./*

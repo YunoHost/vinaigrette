@@ -11,3 +11,17 @@ SignWith: 59A3E6FF
 Tracking: all includechanges keepsources
 Log: logfile
  --changes --via=include /home/vinaigrette/scripts/repo/process-include
+
+Origin: YunoHost
+Label: YunoHost for Buster
+Suite: stable
+Codename: buster
+Version: 10.0
+Architectures: i386 amd64 armel armhf arm64 source
+Components: stable testing unstable extra
+AlsoAcceptFor: buster-stable buster-testing buster-unstable stable testing unstable
+Description: YunoHost repository for Debian Buster
+SignWith: 59A3E6FF
+Tracking: all includechanges keepsources
+Log: logfile
+ --changes --via=include /home/vinaigrette/scripts/repo/process-include

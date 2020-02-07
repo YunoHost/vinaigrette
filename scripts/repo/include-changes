@@ -7,6 +7,14 @@ changes_file=$3
 source /home/vinaigrette/config/config
 source /home/vinaigrette/scripts/package_helpers.sh
 
+# Fucking ugly manual patch because when building packages for buster, the Binary: field is missing...
+if ! grep -q "Binary:" $changes_file
+then
+	# We take is from the .dsc file
+	DSC=$(echo $changes_file | sed 's/_source.changes/.dsc/g')
+	echo $(grep "Binary:" $DSC) >> $changes_file
+fi
+
 sudo reprepro -C $distribution -V -b $REPO_DIR include $codename $changes_file
 RET=$?
 
