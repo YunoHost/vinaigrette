@@ -20,7 +20,7 @@ Usage:
   $THISSCRIPT <project> <branch> <version>
 
 Arguments:
-  <project>     metronome, rspamd or unscd
+  <project>     metronome or other project name to be built
   <branch>      stable, testing or unstable
 
 EOF
@@ -40,7 +40,8 @@ function main()
 
 function validate_arguments()
 {
-    [[ $PACKAGE =~ ^metronome|rspamd|unscd|python-toml$ ]] || critical "Invalid package $PACKAGE"
+    [[ $PACKAGE =~ ^metronome$ ]] || critical "Invalid package $PACKAGE"
+    #[[ $PACKAGE =~ ^metronome|rspamd|unscd|python-toml$ ]] || critical "Invalid package $PACKAGE" # (These are the old stuff for which we had custom builds in stretch)
     [[ $BRANCH =~ ^testing|stable|unstable$ ]] || critical "Invalid branch $BRANCH"
     [[ "$(tty)" != "not a tty" ]] || critical "You aint in a tty (are you in a 'lxc exec' ?) The script can't run because pbuilder won't be happy :|"
 }
@@ -55,20 +56,21 @@ function tweak_metronome()
     readonly VERSION="$(dpkg-parsechangelog -S Version 2>/dev/null)+yunohost-1"
 }
 
-function tweak_unscd()
-{
-    readonly VERSION="$(dpkg-parsechangelog -S Version 2>/dev/null)+yunohost"
-}
-
-function tweak_rspamd()
-{
-    readonly VERSION="$(dpkg-parsechangelog -S Version 2>/dev/null)+yunohost"
-}
-
-function tweak_python-toml()
-{
-    readonly VERSION="$(dpkg-parsechangelog -S Version 2>/dev/null)+yunohost"
-}
+# (These are the old stuff for which we had custom builds in stretch)
+#function tweak_unscd()
+#{
+#    readonly VERSION="$(dpkg-parsechangelog -S Version 2>/dev/null)+yunohost"
+#}
+#
+#function tweak_rspamd()
+#{
+#    readonly VERSION="$(dpkg-parsechangelog -S Version 2>/dev/null)+yunohost"
+#}
+#
+#function tweak_python-toml()
+#{
+#    readonly VERSION="$(dpkg-parsechangelog -S Version 2>/dev/null)+yunohost"
+#}
 
 function build()
 {
