@@ -35,15 +35,16 @@ function build_image()
 
     if [ "$ARCH" == "amd64" ];
     then
-        #chroot $CHROOT wget -q -O /tmp/setup_nodejs https://deb.nodesource.com/setup_4.x
-        chroot $CHROOT wget -q -O /tmp/setup_nodejs https://deb.nodesource.com/setup_6.x
-        chroot $CHROOT bash /tmp/setup_nodejs
-        chroot $CHROOT apt install -y nodejs
+        chroot $CHROOT wget https://github.com/tj/n/archive/v4.1.0.tar.gz
+        chroot $CHROOT tar -xvzf v4.1.0.tar.gz
+        chroot $CHROOT /bin/bash -c "cd n-4.1.0; make install"
+        chroot $CHROOT n 10 # We take nodjes version 10 because idk
     fi
 
     chroot $CHROOT apt clean
 
     cd $CHROOT
+    echo "Now creating tarball with the filesystem ..."
     tar -czf $INIT_DIR/${DISTRIB}-${ARCH}.tgz ./*
 
     echo ""

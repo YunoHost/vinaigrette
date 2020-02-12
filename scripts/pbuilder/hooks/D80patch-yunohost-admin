@@ -9,7 +9,13 @@
 if ls -d /build/yunohost-admin* >dev/null 2>&1
 then
 	echo "======================================================"
-	/usr/bin/apt-get install git nodejs -y
+	DIST="$(cat /etc/os-release | grep CODENAME= | cut -d = -f 2)"
+	if [ "$DIST" != "buster" ]
+	then
+		/usr/bin/apt-get install git nodejs -y
+	else
+		/usr/bin/apt-get install git -y
+	fi
 	echo "========================"
 	echo "Patching debian/rules ..."
 	echo "========================"
@@ -44,7 +50,12 @@ EOF
 	mkdir /nonexistent
 	chown pbuilder:pbuilder /nonexistent
 	cd /build/yunohost-admin*/src
-	su pbuilder -c "npm install"
+	if [ "$DIST" != "buster" ]
+	then
+		su pbuilder -c "npm install"
+	else
+		su pbuilder -c "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin npm install"
+	fi
 	echo "======================================================"
 fi
 
