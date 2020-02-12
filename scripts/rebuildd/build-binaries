@@ -22,19 +22,20 @@ elif [[ $arch == all ]]; then
     DEBBUILDOPTS="-b"
 fi
 
-# Retrieve the number of processors
-if [ -x /usr/bin/getconf ]; then
-    JOBS=`getconf _NPROCESSORS_CONF`
-else
-    JOBS=1
-fi
+## Retrieve the number of processors for parallel building
+## N.B. : disabled by Alex on Feb 12 2020 because this makes some build fail on buster for some reason...
+#if [ -x /usr/bin/getconf ]; then
+#    JOBS=`getconf _NPROCESSORS_CONF`
+#else
+#    JOBS=1
+#fi
+#DEBBUILDOPTS="$DEBBUILDOPTS -j$JOBS"
 
 echo "######################"
 echo " Starting build ...   "
 echo "######################"
 
 # Format needed pbuilder arguments
-DEBBUILDOPTS="$DEBBUILDOPTS -j$JOBS"
 DSC_FILE="${package}_${version}.dsc"
 BASE_TGZ="${PBUILDER_IMAGES}/${codename}-${arch}.tgz"
 EXTRA_OPTS=()
@@ -60,6 +61,8 @@ if [[ $arch == "arm64" ]];
 then
    CONFIGFILE="--configfile $PBUILDER_CONF/arm64.conf"
 fi
+
+echo "Running 'pbuilder build --basetgz "${BASE_TGZ}" --debbuildopts "${DEBBUILDOPTS}" ${CONFIGFILE} "${EXTRA_OPTS[@]}" $DSC_FILE"
 
 pbuilder build                            \
          --basetgz "${BASE_TGZ}"          \
