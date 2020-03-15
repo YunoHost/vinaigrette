@@ -5,7 +5,7 @@ package=$2
 version=$3
 arch=$4
 
-sendxmpppy "Starting build ${package}/${version} for $arch ..."
+sendxmpppy "Starting build ${package}/${version} for arch=$arch ..."
 
 source /home/vinaigrette/config/config
 source /home/vinaigrette/scripts/package_helpers.sh
@@ -23,7 +23,7 @@ elif [[ $arch == all ]]; then
 fi
 
 ## Retrieve the number of processors for parallel building
-## N.B. : disabled by Alex on Feb 12 2020 because this makes some build fail on buster for some reason...
+## N.B. : disabled by Alex on Feb 12 2020 because this makes some build fail on buster for some reason..
 #if [ -x /usr/bin/getconf ]; then
 #    JOBS=`getconf _NPROCESSORS_CONF`
 #else
@@ -75,7 +75,7 @@ exit_code=$?
 
 if [[ $exit_code != 0 ]];
 then
-	sendxmpppy "Building ${package}/${version} for $arch failed ?!"
+	sendxmpppy "Building ${package}/${version} for arch=$arch failed ?!"
 fi
 
 exit $exit_code

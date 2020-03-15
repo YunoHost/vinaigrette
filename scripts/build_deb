@@ -41,7 +41,7 @@ function main()
     add_to_reprepro
 
     success "Build will start soon. See 'rebuildd-job list | tail'"
-    sendxmpppy "Added builds for ${PACKAGE}/${VERSION} in branch ${BRANCH} ..."
+    sendxmpppy "Added builds for ${PACKAGE}/${VERSION} for ${DISTRIB}/${BRANCH} ..."
 }
 
 # ################# #
