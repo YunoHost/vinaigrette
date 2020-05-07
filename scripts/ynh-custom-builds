@@ -3,7 +3,7 @@
 readonly THISSCRIPT=$0
 readonly PACKAGE=$1
 readonly BRANCH=$2
-readonly DISTRIB="buster"
+readonly DISTRIB="stretch"
 
 source /home/vinaigrette/config/config
 source /home/vinaigrette/scripts/common.sh

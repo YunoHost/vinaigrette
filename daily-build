@@ -2,7 +2,7 @@
 
 readonly THISSCRIPT=$0
 readonly BRANCH_NIGHTLY="unstable"
-readonly DISTRIBS="buster"
+readonly DISTRIBS="stretch buster"
 readonly TIMETAG="$(date +%Y%m%d%H%M)"
 readonly PACKAGES="moulinette SSOwat yunohost yunohost-admin"
 readonly FORCE="false"
