@@ -4,23 +4,15 @@ PKG_PATH=$1
 
 apt-get -q update
 
-VERSION=$(sed 's/\..*//' /etc/debian_version)
-if [[ "$VERSION" == '7' ]]; then
-    apt-get -q -y -t wheezy-backports install devscripts
-fi
-
 cd $PKG_PATH
 
-echo \
-"******************************************************************************"
+echo "--------------------------------"
 echo "Installing build-dependencies..."
 
-mk-build-deps -i -r -t "apt-get --no-install-recommends -y" \
-  || (echo "Error." && exit 1)
+mk-build-deps -i -r -t "apt-get --no-install-recommends -y" || exit 1
 rm -f *build-deps*_all.deb
 
-echo \
-"******************************************************************************"
+echo "--------------------------------"
 echo "Creating source package..."
 
 # Creating source package without signing it
