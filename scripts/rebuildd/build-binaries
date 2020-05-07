@@ -37,7 +37,7 @@ echo "######################"
 
 # Format needed pbuilder arguments
 DSC_FILE="${package}_${version}.dsc"
-BASE_TGZ="${PBUILDER_IMAGES}/${codename}-${arch}.tgz"
+BASE_TGZ="${PBUILDER_CHROOTS}/${codename}-${arch}.tgz"
 EXTRA_OPTS=()
 CONFIGFILE=""
 

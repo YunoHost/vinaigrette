@@ -1,20 +1,21 @@
 #!/bin/bash
 
-# For some reason, building images for buster from stretch requires libdebian-installer4 0.119 instead of 0.110, c.f. https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=904699 ... installed it by manually downloading and dpkg -i the .deb
+# For some reason, building chroots for buster from stretch requires libdebian-installer4 0.119 instead of 0.110, c.f. https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=904699 ... installed it by manually downloading and dpkg -i the .deb
 readonly DISTRIB=buster
 readonly INIT_DIR=$PWD
-readonly ARCHS="amd64"
-#readonly ARCHS="amd64 i386 armhf armel arm64"
+#readonly ARCHS="amd64"
+#readonly ARCHS="i386 armhf armel arm64"
+readonly ARCHS="arm64"
 
 function main()
 {
     for ARCH in $ARCHS
     do
-        build_image $ARCH
+        build_chroot $ARCH
     done
 }
 
-function build_image()
+function build_chroot()
 {
     local ARCH=$1
     local CHROOT=chroot-${DISTRIB}-${ARCH}
@@ -48,7 +49,7 @@ function build_image()
     tar -czf $INIT_DIR/${DISTRIB}-${ARCH}.tgz ./*
 
     echo ""
-    echo "Output image should be available as $INIT_DIR/${DISTRIB}-${ARCH}.tgz"
+    echo "Output chroot archive should be available as $INIT_DIR/${DISTRIB}-${ARCH}.tgz"
     echo ""
 }
 

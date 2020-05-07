@@ -40,7 +40,7 @@ ln -s $VINAIGRETTE_HOME/config/rebuildd.conf /etc/rebuildd/rebuilddrc
 rm /etc/default/rebuildd
 ln -s $VINAIGRETTE_HOME/config/rebuildd.default /etc/default/rebuildd
 
-ln -s $VINAIGRETTE_HOME/images /var/cache/pbuilder/images
+ln -s $VINAIGRETTE_HOME/chroots /var/cache/pbuilder/chroots
 ln -s /var/cache/pbuilder/result $PBUILDER_RESULTS
 
 rm -f /etc/pbuilderrc

@@ -12,7 +12,7 @@ export DEBSIGN_KEYID
 export DEBFULLNAME
 export DEBEMAIL
 
-readonly IMG="${PBUILDER_IMAGES}/${DISTRIB}-amd64.tgz"
+readonly IMG="${PBUILDER_CHROOTS}/${DISTRIB}-amd64.tgz"
 
 # ##### #
 # Usage #
