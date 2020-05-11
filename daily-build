@@ -86,7 +86,7 @@ function build_if_needed()
 	"Daily build." \
         > /dev/null 2>&1
 
-    head -n 10 debian/changelog
+    head -n 5 debian/changelog
 
     # Launch the build using build_deb script
     build

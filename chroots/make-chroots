@@ -36,8 +36,8 @@ function build_chroot()
 
     if [ "$ARCH" == "amd64" ];
     then
-	# This is for building yunohost-admin
-        chroot $CHROOT apt install npm nodejs
+        # This is for building yunohost-admin
+        chroot $CHROOT apt install -y npm nodejs
     fi
 
     chroot $CHROOT apt clean

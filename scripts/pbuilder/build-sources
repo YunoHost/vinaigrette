@@ -9,14 +9,16 @@ cd $PKG_PATH
 echo "--------------------------------"
 echo "Installing build-dependencies..."
 
-mk-build-deps -i -r -t "apt-get --no-install-recommends -y" || exit 1
+LOG="/var/log/mk-build-deps.log"
+mk-build-deps -i -t "apt-get --no-install-recommends -y" >> $LOG 2>&1 \
+  || { echo "mk-build-deps failed, logs are in $LOG"; exit 1; }
 rm -f *build-deps*_all.deb
 
 echo "--------------------------------"
 echo "Creating source package..."
 
 # Creating source package without signing it
-debuild -S -sa -uc
+debuild -S -sa -uc --no-lintian
 
 # Be sure to clean directory
 debclean

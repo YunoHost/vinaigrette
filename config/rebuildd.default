@@ -1,5 +1,5 @@
 START_REBUILDD=1
-START_REBUILDD_HTTPD=1
+START_REBUILDD_HTTPD=0
 PBUILDER_BIN=/usr/sbin/pbuilder
 PBUILDER_CACHE_PATH="/var/cache/pbuilder"
 PBUILDER_MIRROR=https://ftp.debian.org/debian

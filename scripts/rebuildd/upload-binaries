@@ -29,40 +29,26 @@ get_source_component() {
         listfilter $CODENAME "\$Source (==${package}), \$SourceVersion (==${version})"
 }
 COMPONENT=$(get_source_component)
-if [ -z "$COMPONENT" ]; then
-    echo "Unable to retrieve source package component"
-    exit 1
-fi
+[ -n "$COMPONENT" ] || echo "Unable to retrieve source package component"
 
 echo "#########################"
 echo " Adding binary package..."
 echo "#########################"
 
-include_to() {
-    # Include changes to the given repo (waiting 1m max)
-    echo "Adding to ${1}/$COMPONENT..."
-    reprepro --waitforlock 6 -b $REPO_DIR -C $COMPONENT include $1 \
-        $CHANGES_FILE > /dev/null 1>&1 || return 1
-}
+# Include changes to the given repo (waiting 1m max)
+echo "Adding to $CODENAME/$COMPONENT..."
 
-if include_to $CODENAME ; then
-    status=0
-else
-    status=1
-fi
+reprepro --waitforlock 6 -b $REPO_DIR -C $COMPONENT include $CODENAME $CHANGES_FILE > /dev/null
 
+status=$?
 if [ $status -eq 0 ]; then
     # Clean pbuilder results
     for f in $(get_files $CHANGES_FILE); do
         rm -f /var/cache/pbuilder/result/$f
     done
+    sendxmpppy "Completed build of ${package}/${version} for ${CODENAME}/${COMPONENT}/${arch}."
+else
+    sendxmpppy "Failed to include change of ${package}/${version} for ${CODENAME}/${COMPONENT}/${arch} ?!"
 fi
-
-
-# Send notification on xmpp dev room
-
-export HOME=$HOME_PBUILDER
-
-sendxmpppy "Completed build of ${package}/${version} for ${CODENAME}/${COMPONENT}/${arch}."
 
 exit $status
