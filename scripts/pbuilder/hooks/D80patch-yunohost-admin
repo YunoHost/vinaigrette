@@ -13,9 +13,6 @@ then
 	if [ "$DIST" != "buster" ]
 	then
 		/usr/bin/apt-get install git nodejs -y
-	else
-		/usr/bin/apt-get install git -y
-	fi
 	echo "========================"
 	echo "Patching debian/rules ..."
 	echo "========================"
@@ -44,6 +41,7 @@ index b031511..477f27c 100755
  	rm -rf src/dist
 EOF
 	patch -p1 < rules.patch
+	fi
 	echo "========================"
 	echo "Starting npm install ..."
 	echo "========================"

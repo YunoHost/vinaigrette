@@ -10,72 +10,34 @@ sendxmpppy "Starting build ${package}/${version} for arch=$arch ..."
 source /home/vinaigrette/config/config
 source /home/vinaigrette/scripts/package_helpers.sh
 
-# Build only binary-only limited to architecture dependent packages
-DEBBUILDOPTS="-B"
+if [[ $arch == all ]]; then arch=$DEFAULT_ARCH; fi
 
 if [[ $arch == $DEFAULT_ARCH ]]; then
     # Build architecture independent packages too
     DEBBUILDOPTS="-b"
-elif [[ $arch == all ]]; then
-    # Build architecture independent packages too on default arch
-    arch=$DEFAULT_ARCH
-    DEBBUILDOPTS="-b"
+else
+    # Build only binary-only limited to architecture dependent packages
+    DEBBUILDOPTS="-B"
 fi
 
-## Retrieve the number of processors for parallel building
-## N.B. : disabled by Alex on Feb 12 2020 because this makes some build fail on buster for some reason..
-#if [ -x /usr/bin/getconf ]; then
-#    JOBS=`getconf _NPROCESSORS_CONF`
-#else
-#    JOBS=1
-#fi
-#DEBBUILDOPTS="$DEBBUILDOPTS -j$JOBS"
+# Format needed pbuilder arguments
+DSC_FILE="${package}_${version}.dsc"
+BASE_TGZ="${PBUILDER_CHROOTS}/${codename}-${arch}.tgz"
 
 echo "######################"
 echo " Starting build ...   "
 echo "######################"
 
-# Format needed pbuilder arguments
-DSC_FILE="${package}_${version}.dsc"
-BASE_TGZ="${PBUILDER_CHROOTS}/${codename}-${arch}.tgz"
-EXTRA_OPTS=()
-CONFIGFILE=""
+echo "Running 'pbuilder build --basetgz $BASE_TGZ --debbuildopts $DEBBUILDOPTS $DSC_FILE"
 
-# Use specific conf for nodejs builds
-if [[ $package == "yunohost-admin" ]];
-then
-    CONFIGFILE="--configfile $PBUILDER_CONF/nodejs.conf"
-fi
-        
-if [[ $arch == "armhf" ]]; 
-then
-   CONFIGFILE="--configfile $PBUILDER_CONF/armhf.conf"
-fi
-
-if [[ $arch == "armel" ]];
-then
-   CONFIGFILE="--configfile $PBUILDER_CONF/armel.conf"
-fi
-
-if [[ $arch == "arm64" ]];
-then
-   CONFIGFILE="--configfile $PBUILDER_CONF/arm64.conf"
-fi
-
-echo "Running 'pbuilder build --basetgz "${BASE_TGZ}" --debbuildopts "${DEBBUILDOPTS}" ${CONFIGFILE} "${EXTRA_OPTS[@]}" $DSC_FILE"
-
-pbuilder build                            \
-         --basetgz "${BASE_TGZ}"          \
- 	 --debbuildopts "${DEBBUILDOPTS}" \
- 	 ${CONFIGFILE}                    \
- 	 "${EXTRA_OPTS[@]}"               \
-	 $DSC_FILE
+pbuilder build                          \
+         --basetgz "$BASE_TGZ"          \
+         --architecture $arch           \
+         --debbuildopts "$DEBBUILDOPTS" \
+         $DSC_FILE
 
 exit_code=$?
 
-if [[ $exit_code != 0 ]];
-then
-	sendxmpppy "Building ${package}/${version} for arch=$arch failed ?!"
-fi
+[[ $exit_code == 0 ]] || sendxmpppy "Building ${package}/${version} for arch=$arch failed ?!"
 
 exit $exit_code
