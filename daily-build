@@ -5,13 +5,20 @@ readonly BRANCH_NIGHTLY="unstable"
 readonly DISTRIBS="stretch buster"
 readonly TIMETAG="$(date +%Y%m%d%H%M)"
 readonly PACKAGES="moulinette SSOwat yunohost yunohost-admin"
-readonly FORCE="false"
+if [ -z "$FORCE" ]
+then
+	readonly FORCE="false"
+fi
+readonly LAST_BUILDS_CACHE="/var/cache/vinaigrette/last_builds/"
 
 source /home/vinaigrette/config/config
 
 
 function main()
 {
+
+    mkdir -p $LAST_BUILDS_CACHE
+
     #if [[ "$(tty)" == "not a tty" ]]
     #then
     #    echo "You aint in a tty (are you in a 'lxc exec' ?)"
@@ -38,10 +45,11 @@ function build_if_needed()
 {
     local PACKAGE=$1
     local DISTRIB=$2
+    local LAST_BUILD_FOR_THIS_PACKAGE=$LAST_BUILDS_CACHE/${DISTRIB}_${BRANCH_NIGHTLY}_${PACKAGE}
 
     cd $GIT_REPOS/$PACKAGE
 
-    git fetch origin
+    git fetch origin >/dev/null 2>/dev/null
 
     # Check if there's a branch named distrib-branch (e.g. stretch-unstable)
     # By default, keep just 'branch'
@@ -58,7 +66,21 @@ function build_if_needed()
     fi
 
     git checkout $BRANCH_NIGHTLY_GIT >/dev/null 2>/dev/null
-    if [ -z "$(git log ${BRANCH_NIGHTLY_GIT}..origin/${BRANCH_NIGHTLY_GIT})" ]; then
+    git pull origin $BRANCH_NIGHTLY_GIT >/dev/null 2>/dev/null
+    git reset --hard origin/$BRANCH_NIGHTLY_GIT
+
+    # Check if build is needed
+
+    if [ -e $LAST_BUILD_FOR_THIS_PACKAGE ] 
+    then
+	    TIMESTAMP_LASTBUILD=$(stat -c %Y $LAST_BUILD_FOR_THIS_PACKAGE)
+    else
+	    TIMESTAMP_LASTBUILD=0
+    fi
+    TIMESTAMP_HEAD=$(git show -s --format=%ct HEAD)
+
+    if [ $TIMESTAMP_HEAD -lt $TIMESTAMP_LASTBUILD ]
+    then
 	if ! "$FORCE";
 	then
 		echo "Sources up-to-date, nothing to build."
@@ -67,9 +89,6 @@ function build_if_needed()
 		echo "Sources up-to-date but forcing build anyway."
 	fi
     fi
-
-    git pull origin $BRANCH_NIGHTLY_GIT >/dev/null
-    git reset --hard origin/$BRANCH_NIGHTLY_GIT
 
     VERSION=$(dpkg-parsechangelog -S Version 2>/dev/null)
     VERSION_NIGHTLY="${VERSION}+${TIMETAG}"
@@ -90,6 +109,8 @@ function build_if_needed()
 
     # Launch the build using build_deb script
     build
+
+    touch $LAST_BUILD_FOR_THIS_PACKAGE
 
     # Restore changelog
     echo "> Restoring previous changelog"
