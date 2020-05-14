@@ -18,7 +18,7 @@ echo "--------------------------------"
 echo "Creating source package..."
 
 # Creating source package without signing it
-debuild -S -sa -uc --no-lintian
+debuild --no-lintian -S -sa -uc
 
 # Be sure to clean directory
 debclean
