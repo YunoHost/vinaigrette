@@ -75,16 +75,16 @@ function build_sources()
     boxed "Building source package of ${PACKAGE} ${VERSION} ..."
 
     pbuilder execute --bindmounts ${ROOT_DIR} --basetgz ${IMG} -- ${BUILD_SOURCES} $PKG_DIR \
-	    || critical "An error occured while building source package"
+	    || { sendxmpppy "An error occured while building source package for $PACKAGE"; critical "An error occured while building source package"; }
 
-    [[ -f ${CHANGES_FILE} ]] || critical "An error occured while building source package (no change file available)"
+    [[ -f ${CHANGES_FILE} ]] || { sendxmpppy "An error occured while building source package for $PACKAGE"; critical "An error occured while building source package (no change file available)"; }
 }
 
 function add_to_reprepro()
 {
     boxed "Adding ${PACKAGE}_${VERSION} to ${DISTRIB}/${BRANCH}..."
 
-    $INCLUDE_CHANGES $DISTRIB $BRANCH $CHANGES_FILE || critical "An error occured while including source package"
+    $INCLUDE_CHANGES $DISTRIB $BRANCH $CHANGES_FILE || { sendxmpppy "An error occured while including source package $PACKAGE"; critical "An error occured while including source package"; }
 }
 
 [[ "$1" =~ ^-h|--help$ ]] && (usage; exit 0) || main
