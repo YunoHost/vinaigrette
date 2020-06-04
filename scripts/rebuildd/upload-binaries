@@ -46,9 +46,9 @@ if [ $status -eq 0 ]; then
     for f in $(get_files $CHANGES_FILE); do
         rm -f /var/cache/pbuilder/result/$f
     done
-    sendxmpppy "Completed build of ${package}/${version} for ${CODENAME}/${COMPONENT}/${arch}."
+    sendxmpppy "✔️  Completed build for ${package}/${version} for ${CODENAME}/${COMPONENT}/${arch}."
 else
-    sendxmpppy "Failed to include change of ${package}/${version} for ${CODENAME}/${COMPONENT}/${arch} ?!"
+    sendxmpppy "❌ Failed to include change of ${package}/${version} for ${CODENAME}/${COMPONENT}/${arch} ?!"
 fi
 
 exit $status

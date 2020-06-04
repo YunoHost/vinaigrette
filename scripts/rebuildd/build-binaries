@@ -5,7 +5,7 @@ package=$2
 version=$3
 arch=$4
 
-sendxmpppy "Starting build ${package}/${version} for arch=$arch ..."
+sendxmpppy "⏳ Starting  build for ${package}/${version} for arch=$arch ..."
 
 source /home/vinaigrette/config/config
 source /home/vinaigrette/scripts/package_helpers.sh
@@ -38,6 +38,6 @@ pbuilder build                          \
 
 exit_code=$?
 
-[[ $exit_code == 0 ]] || sendxmpppy "Building ${package}/${version} for arch=$arch failed ?!"
+[[ $exit_code == 0 ]] || sendxmpppy "❌  Failed   build for ${package}/${version} for arch=$arch ?!"
 
 exit $exit_code

@@ -3,7 +3,9 @@
 readonly THISSCRIPT=$0
 readonly PACKAGE=$1
 readonly BRANCH=$2
+#readonly DISTRIB="buster"
 readonly DISTRIB="stretch"
+readonly DISTRIB_N="9"
 
 source /home/vinaigrette/config/config
 source /home/vinaigrette/scripts/common.sh
@@ -60,7 +62,7 @@ function tweak_miniupnpc()
 function tweak_metronome()
 {
     # For some reason metronome version must include a revision ("-x")
-    readonly VERSION="$(dpkg-parsechangelog -S Version 2>/dev/null)+yunohost-1"
+    readonly VERSION="$(dpkg-parsechangelog -S Version 2>/dev/null)+ynh$DISTRIB_N-1"
 }
 
 # (These are the old stuff for which we had custom builds in stretch)

@@ -5,10 +5,7 @@ readonly BRANCH_NIGHTLY="unstable"
 readonly DISTRIBS="stretch buster"
 readonly TIMETAG="$(date +%Y%m%d%H%M)"
 readonly PACKAGES="moulinette SSOwat yunohost yunohost-admin"
-if [ -z "$FORCE" ]
-then
-	readonly FORCE="false"
-fi
+readonly FORCE="false"
 readonly LAST_BUILDS_CACHE="/var/cache/vinaigrette/last_builds/"
 
 source /home/vinaigrette/config/config

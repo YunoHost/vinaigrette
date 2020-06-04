@@ -15,16 +15,16 @@ then
 	echo $(grep "Binary:" $DSC) >> $changes_file
 fi
 
-sudo reprepro -C $distribution -V -b $REPO_DIR include $codename $changes_file
+reprepro -C $distribution -V -b $REPO_DIR include $codename $changes_file
 RET=$?
 
 # Cleaning files
 if [ $RET -eq 0 ]; then
     dir=$(cd `dirname $changes_file` && pwd)
     for f in $(get_files ${changes_file}); do
-        ! [[ $f =~ \.orig\.tar\.(gz|xz)$ ]] && sudo rm -f ${dir}/$f
+        ! [[ $f =~ \.orig\.tar\.(gz|xz)$ ]] && rm -f ${dir}/$f
     done
-    sudo rm -f $changes_file
+    rm -f $changes_file
 fi
 
 exit $RET

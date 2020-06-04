@@ -38,7 +38,7 @@ fi
 
 # Kick off the job
 for a in $arch; do
-    sudo /home/vinaigrette/scripts/rebuildd-job add $package $version $codename $a
+    /home/vinaigrette/scripts/rebuildd-job add $package $version $codename $a
 done
 
 exit 0
