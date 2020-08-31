@@ -1,8 +1,8 @@
 #!/bin/bash
 
 readonly THISSCRIPT=$0
-readonly BRANCH_NIGHTLY="unstable"
-readonly DISTRIBS="stretch buster"
+readonly BRANCH_NIGHTLY="dev"
+readonly DISTRIBS="buster"
 readonly TIMETAG="$(date +%Y%m%d%H%M)"
 readonly PACKAGES="moulinette SSOwat yunohost yunohost-admin"
 readonly FORCE="false"
@@ -42,29 +42,15 @@ function build_if_needed()
 {
     local PACKAGE=$1
     local DISTRIB=$2
-    local LAST_BUILD_FOR_THIS_PACKAGE=$LAST_BUILDS_CACHE/${DISTRIB}_${BRANCH_NIGHTLY}_${PACKAGE}
+    local LAST_BUILD_FOR_THIS_PACKAGE=$LAST_BUILDS_CACHE/${DISTRIB}_${PACKAGE}
 
     cd $GIT_REPOS/$PACKAGE
 
     git fetch origin >/dev/null 2>/dev/null
 
-    # Check if there's a branch named distrib-branch (e.g. stretch-unstable)
-    # By default, keep just 'branch'
-    BRANCH_NIGHTLY_GIT="$BRANCH_NIGHTLY"
-    if git branch -ar | grep -q origin/$DISTRIB-$BRANCH_NIGHTLY
-    then
-	    BRANCH_NIGHTLY_GIT="$DISTRIB-$BRANCH_NIGHTLY"
-    fi
-
-    # If the branch name is an alias to another branch, "resolve" the alias
-    if grep -q "ref: " .git/refs/heads/$BRANCH_NIGHTLY_GIT 2>/dev/null
-    then
-	    BRANCH_NIGHTLY_GIT=$(cat .git/refs/heads/$BRANCH_NIGHTLY_GIT | tr '/' ' ' | awk '{print $4}')
-    fi
-
-    git checkout $BRANCH_NIGHTLY_GIT >/dev/null 2>/dev/null
-    git pull origin $BRANCH_NIGHTLY_GIT >/dev/null 2>/dev/null
-    git reset --hard origin/$BRANCH_NIGHTLY_GIT
+    git checkout $BRANCH_NIGHTLY >/dev/null 2>/dev/null
+    git pull origin $BRANCH_NIGHTLY >/dev/null 2>/dev/null
+    git reset --hard origin/$BRANCH_NIGHTLY
 
     # Check if build is needed
 
@@ -97,7 +83,7 @@ function build_if_needed()
     dch --package "${PACKAGE}" \
         --force-bad-version \
 	-v "${VERSION_NIGHTLY}" \
-	-D "${BRANCH_NIGHTLY}" \
+	-D "unstable" \
 	--force-distribution \
 	"Daily build." \
         > /dev/null 2>&1
@@ -131,7 +117,7 @@ function build()
    # Build Debian package
    echo "> Starting build ..."
    cd $TMP_FOLDER
-   $BUILD_DEB $DISTRIB $BRANCH_NIGHTLY .
+   $BUILD_DEB $DISTRIB "unstable" .
 }
 
 main
