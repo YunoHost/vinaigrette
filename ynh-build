@@ -3,7 +3,7 @@
 readonly THISSCRIPT=$0
 readonly PROJECT=$1
 readonly BRANCH=$2
-readonly DISTRIB="stretch"
+readonly DISTRIB="buster"
 readonly VERSION=$3
 readonly TAG=$(echo "debian/$VERSION" | tr '~' '-')
 
@@ -37,7 +37,7 @@ function validate_arguments()
 {
     [[ $PROJECT =~ ^yunohost|yunohost-admin|moulinette|SSOwat$ ]] || critical "Invalid project $PROJECT"
     [[ $BRANCH =~ ^testing|stable|unstable$ ]] || critical "Invalid branch $BRANCH"
-    [[ $DISTRIB =~ ^stretch$ ]] || critical "Invalid distribution $DISTRIB"
+    [[ $DISTRIB =~ ^stretch|buster$ ]] || critical "Invalid distribution $DISTRIB"
     [[ ! -z "$VERSION" ]] || critical "Invalid version $VERSION"
     [[ "$(tty)" != "not a tty" ]] || critical "You aint in a tty (are you in a 'lxc exec' ?) The script can't run because pbuilder won't be happy :|"
 }
@@ -50,8 +50,8 @@ function checkout_tag()
     cd $GIT_REPOS/$PROJECT
     git fetch --quiet
     git fetch --tags --quiet
-    git checkout $DISTRIB-$BRANCH --quiet
-    git reset --hard origin/$DISTRIB-$BRANCH --quiet
+    git checkout dev --quiet
+    git reset --hard dev --quiet
 
     # Validate constrains for the version number given (is in changelog + has corresponding tag)
 
