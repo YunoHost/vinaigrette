@@ -50,8 +50,8 @@ function checkout_tag()
     cd $GIT_REPOS/$PROJECT
     git fetch --quiet
     git fetch --tags --quiet
-    git checkout dev --quiet
-    git reset --hard dev --quiet
+    git checkout $TAG --quiet
+    git reset --hard $TAG --quiet
 
     # Validate constrains for the version number given (is in changelog + has corresponding tag)
 
