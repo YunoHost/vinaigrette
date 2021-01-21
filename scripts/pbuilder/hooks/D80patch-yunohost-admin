@@ -48,7 +48,7 @@ EOF
 	echo "========================"
 	mkdir /nonexistent
 	chown pbuilder:pbuilder /nonexistent
-	cd /build/yunohost-admin*/src
+	cd /build/yunohost-admin*/app
 	if [ "$DIST" != "buster" ]
 	then
 		su pbuilder -c "npm install"
