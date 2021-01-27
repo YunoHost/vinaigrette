@@ -81,11 +81,22 @@ Interesting note from [this page](http://tldp.org/HOWTO/html_single/Debian-Binar
 - To make it happy, you can use the undocumented `removesrc` feature :
 
 ```
+# From the folder /var/www/repo/debian
 reprepro removesrc <codename> <source-package-names> [<source-version>]
 
 # For instance
  reprepro removesrc stretch yunohost-admin 3.0.0+201804281857
 ```
+
+#### Removing a deb package from the repo
+
+```
+reprepro remove <codename> <package>
+
+# For instance, from anywhere
+reprepro -Vb /var/www/repo/debian remove buster python3-miniupnpc
+```
+(`-Vb /var/www/repo/debian` is where the repo is stored)
 
 ### What do I do if a job crashed for some weird reason ?
 
