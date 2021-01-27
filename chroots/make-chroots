@@ -38,10 +38,10 @@ function build_chroot()
     then
         # This is for building yunohost-admin
         chroot $CHROOT apt install -y npm nodejs
-	# Don't ask me why, but stupid nodejs wants to look for stuff inside /lib instead of /usr/lib ...
-	# This only happens when building those chroot ... I don't know why ...
-	chroot $CHROOT ln -s /usr/lib/nodejs /lib/nodejs
-        chroot $CHROOT npm install -g npm
+        # Don't ask me why, but stupid nodejs wants to look for stuff inside /lib instead of /usr/lib ...
+        # This only happens when building those chroot ... I don't know why ...
+        chroot $CHROOT ln -s /usr/lib/nodejs /lib/nodejs
+        chroot $CHROOT npm install -g npm@latest
     fi
 
     chroot $CHROOT apt clean
