@@ -32,7 +32,7 @@ function build_chroot()
 
     chroot $CHROOT apt update
     chroot $CHROOT apt dist-upgrade
-    chroot $CHROOT apt install -y build-essential debhelper cmake wget devscripts git
+    chroot $CHROOT apt install -y build-essential debhelper cmake wget devscripts git aptitude
 
     if [ "$ARCH" == "amd64" ];
     then
