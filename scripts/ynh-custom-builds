@@ -3,9 +3,9 @@
 readonly THISSCRIPT=$0
 readonly PACKAGE=$1
 readonly BRANCH=$2
-#readonly DISTRIB="buster"
-readonly DISTRIB="stretch"
-readonly DISTRIB_N="9"
+readonly DISTRIB="buster"
+#readonly DISTRIB="stretch"
+readonly DISTRIB_N="10"
 
 source /home/vinaigrette/config/config
 source /home/vinaigrette/scripts/common.sh
@@ -19,7 +19,7 @@ function usage()
     cat << EOF
 
 Usage:
-  $THISSCRIPT <project> <branch> <version>
+  $THISSCRIPT <project> <branch>
 
 Arguments:
   <project>     metronome or other project name to be built
@@ -42,7 +42,7 @@ function main()
 
 function validate_arguments()
 {
-    [[ $PACKAGE =~ ^metronome|miniupnpc$ ]] || critical "Invalid package $PACKAGE"
+    [[ $PACKAGE =~ ^metronome|miniupnpc|gevent-websocket$ ]] || critical "Invalid package $PACKAGE"
     #[[ $PACKAGE =~ ^metronome|rspamd|unscd|python-toml$ ]] || critical "Invalid package $PACKAGE" # (These are the old stuff for which we had custom builds in stretch)
     [[ $BRANCH =~ ^testing|stable|unstable$ ]] || critical "Invalid branch $BRANCH"
     [[ "$(tty)" != "not a tty" ]] || critical "You aint in a tty (are you in a 'lxc exec' ?) The script can't run because pbuilder won't be happy :|"
@@ -54,10 +54,13 @@ function validate_arguments()
 
 function tweak_miniupnpc()
 {
-    # For some reason metronome version must include a revision ("-x")
-    readonly VERSION="$(dpkg-parsechangelog -S Version 2>/dev/null)+yunohost"
+    readonly VERSION="$(dpkg-parsechangelog -S Version 2>/dev/null)+ynh$DISTRIB_N"
 }
 
+function tweak_gevent-websocket()
+{
+    readonly VERSION="$(dpkg-parsechangelog -S Version 2>/dev/null)+ynh$DISTRIB_N"
+}
 
 function tweak_metronome()
 {
