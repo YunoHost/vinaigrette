@@ -26,7 +26,7 @@ Usage:
   $THISSCRIPT <distrib> <branch> <folder>
 
 Arguments:
-  <distrib>     stretch or buster
+  <distrib>     stretch or buster or bullseye
   <branch>      stable, testing, or unstable
   <folder>      the folder in which to build...
 EOF
@@ -50,7 +50,7 @@ function main()
 
 function validate_arguments()
 {
-    [[ $DISTRIB =~ ^stretch|buster$ ]] || critical "Invalid distribution $DISTRIB"
+    [[ $DISTRIB =~ ^stretch|buster|bullseye$ ]] || critical "Invalid distribution $DISTRIB"
     [[ $BRANCH =~ ^testing|stable|unstable$ ]] || critical "Invalid branch $BRANCH"
     [[ ! -z "$FOLDER" ]] || critical "Need a folder in which to build"
 }

@@ -1,7 +1,9 @@
 #!/bin/bash
 
-# For some reason, building chroots for buster from stretch requires libdebian-installer4 0.119 instead of 0.110, c.f. https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=904699 ... installed it by manually downloading and dpkg -i the .deb
-readonly DISTRIB=buster
+# For some reason, building chroots for buster from stretch requires libdebian-installer4 0.119 instead of 0.110
+# c.f. https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=904699 ... installed it by manually downloading and dpkg -i the .deb
+
+readonly DISTRIB=bullseye
 readonly INIT_DIR=$PWD
 readonly ARCHS="amd64"
 #readonly ARCHS="i386 armhf armel arm64"
@@ -33,6 +35,10 @@ function build_chroot()
     chroot $CHROOT apt update
     chroot $CHROOT apt dist-upgrade
     chroot $CHROOT apt install -y build-essential debhelper cmake wget devscripts git aptitude
+
+    # Install build depends for yunohost etc
+    chroot $CHROOT apt install -y debhelper devscripts dh-python python3-all python3-yaml python3-jinja2 python3-setuptools python3-psutil
+    chroot $CHROOT apt install -y lua5.1 liblua5.1-dev libidn11-dev libssl-dev txt2man quilt
 
     if [ "$ARCH" == "amd64" ];
     then

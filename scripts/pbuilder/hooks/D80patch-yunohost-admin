@@ -10,7 +10,7 @@ if ls -d /build/yunohost-admin* >dev/null 2>&1
 then
 	echo "======================================================"
 	DIST="$(cat /etc/os-release | grep CODENAME= | cut -d = -f 2)"
-	if [ "$DIST" != "buster" ]
+	if [ "$DIST" == "stretch" ]
 	then
 		/usr/bin/apt-get install git nodejs -y
 	echo "========================"
@@ -49,7 +49,7 @@ EOF
 	mkdir /nonexistent
 	chown pbuilder:pbuilder /nonexistent
 	cd /build/yunohost-admin*/app
-	if [ "$DIST" != "buster" ]
+	if [ "$DIST" == "stretch" ]
 	then
 		su pbuilder -c "npm install"
 	else
