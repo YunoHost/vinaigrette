@@ -65,8 +65,7 @@ function tweak_gevent-websocket()
 
 function tweak_metronome()
 {
-    # For some reason metronome version must include a revision ("-x")
-    readonly VERSION="$(dpkg-parsechangelog -S Version 2>/dev/null)+ynh$DISTRIB_N-1"
+    readonly VERSION="$(dpkg-parsechangelog -S Version 2>/dev/null)+ynh$DISTRIB_N"
 }
 
 # (These are the old stuff for which we had custom builds in stretch)
