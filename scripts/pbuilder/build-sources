@@ -2,7 +2,7 @@
 
 PKG_PATH=$1
 
-apt-get -q update
+apt-get -q update --allow-releaseinfo-change
 
 cd $PKG_PATH
 

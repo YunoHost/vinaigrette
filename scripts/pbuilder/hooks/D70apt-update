@@ -1,2 +1,2 @@
 #!/bin/sh
-/usr/bin/apt-get update
+/usr/bin/apt-get update --allow-releaseinfo-change
