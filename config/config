@@ -10,7 +10,7 @@ REPO_URL="forge.yunohost.org"
 
 # Codenames, components and architectures
 
-AVAILABLE_CODENAMES="stretch buster bullseye"
+AVAILABLE_CODENAMES="buster bullseye"
 AVAILABLE_COMPONENTS="stable testing unstable extra"
 AVAILABLE_ARCH="amd64 i386 armel armhf arm64"
 

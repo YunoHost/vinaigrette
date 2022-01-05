@@ -28,10 +28,6 @@ git clone https://github.com/yunohost/metronome
 git clone https://github.com/YunoHost/rspamd
 git clone https://git.donarmstrong.com/unscd.git
 
-cd yunohost
-git checkout stretch  && git symbolic-ref refs/heads/stretch-unstable refs/heads/stretch
-cd ..
-
 mkdir -p /var/www/repo/debian/conf/
 ln -s $VINAIGRETTE_HOME/config/distributions /var/www/repo/debian/conf/distributions
 

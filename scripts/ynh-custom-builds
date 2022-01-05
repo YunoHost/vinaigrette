@@ -5,7 +5,6 @@ readonly PACKAGE=$1
 readonly BRANCH=$2
 readonly DISTRIB="bullseye"
 #readonly DISTRIB="buster"
-#readonly DISTRIB="stretch"
 readonly DISTRIB_N="11"
 
 source /home/vinaigrette/config/config
@@ -43,8 +42,7 @@ function main()
 
 function validate_arguments()
 {
-    [[ $PACKAGE =~ ^metronome|miniupnpc|gevent-websocket|python-zeroconf$ ]] || critical "Invalid package $PACKAGE"
-    #[[ $PACKAGE =~ ^metronome|rspamd|unscd|python-toml$ ]] || critical "Invalid package $PACKAGE" # (These are the old stuff for which we had custom builds in stretch)
+    [[ $PACKAGE =~ ^metronome|miniupnpc|gevent-websocket|python-zeroconf|lexicon$ ]] || critical "Invalid package $PACKAGE"
     [[ $BRANCH =~ ^testing|stable|unstable$ ]] || critical "Invalid branch $BRANCH"
     [[ "$(tty)" != "not a tty" ]] || critical "You aint in a tty (are you in a 'lxc exec' ?) The script can't run because pbuilder won't be happy :|"
 }
@@ -56,6 +54,11 @@ function validate_arguments()
 function tweak_python-zeroconf()
 {
     readonly VERSION="$(dpkg-parsechangelog -S Version 2>/dev/null)+ynh$DISTRIB_N"
+}
+
+function tweak_lexicon()
+{
+    readonly VERSION="$(dpkg-parsechangelog -S Version 2>/dev/null)+ynh$DISTRIB_N-1"
 }
 
 function tweak_miniupnpc()
@@ -70,24 +73,8 @@ function tweak_gevent-websocket()
 
 function tweak_metronome()
 {
-    readonly VERSION="$(dpkg-parsechangelog -S Version 2>/dev/null)+ynh$DISTRIB_N"
+    readonly VERSION="$(dpkg-parsechangelog -S Version 2>/dev/null)+ynh$DISTRIB_N-1"
 }
-
-# (These are the old stuff for which we had custom builds in stretch)
-#function tweak_unscd()
-#{
-#    readonly VERSION="$(dpkg-parsechangelog -S Version 2>/dev/null)+yunohost"
-#}
-#
-#function tweak_rspamd()
-#{
-#    readonly VERSION="$(dpkg-parsechangelog -S Version 2>/dev/null)+yunohost"
-#}
-#
-#function tweak_python-toml()
-#{
-#    readonly VERSION="$(dpkg-parsechangelog -S Version 2>/dev/null)+yunohost"
-#}
 
 function build()
 {
