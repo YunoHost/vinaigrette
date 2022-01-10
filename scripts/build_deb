@@ -4,13 +4,10 @@ readonly THISSCRIPT=$0
 readonly DISTRIB=$1
 readonly BRANCH=$2
 readonly FOLDER=$3
+readonly ARCHS=$4
 
 source /home/vinaigrette/config/config
 source /home/vinaigrette/scripts/common.sh
-
-#export DEBSIGN_KEYID
-#export DEBFULLNAME
-#export DEBEMAIL
 
 # ##### #
 # Usage #
@@ -27,6 +24,7 @@ Arguments:
   <distrib>         buster or bullseye
   <branch>          stable, testing, or unstable
   <folder>          the folder in which to build...
+  <archs>           list of archs to build (or empty for autodetect). For example: amd63,armhf
 EOF
 }
 
@@ -46,9 +44,12 @@ function main()
 
     boxed "Building ${PACKAGE} ${VERSION} ..."
 
-    # Architecture-agnostic packages have 'architecture: all' in their control files
-    # others have 'architecture: any'
-    if grep -q "Architecture: all" $PKG_DIR/debian/control
+    if [[ -n "$ARCHS" ]]
+    then
+        archs="$(echo $ARCHS | tr ',' ' ')"
+        # Architecture-agnostic packages have 'architecture: all' in their control files
+        # others have 'architecture: any'
+    elif grep -q "Architecture: all" $PKG_DIR/debian/control
     then
         archs="all"
     else
@@ -57,18 +58,25 @@ function main()
 
     for arch in $archs
     do
-        sendxmpppy "⏳ Starting build for ${package}/${version} for $DISTRIB/$BRANCH/$ARCH ..."
+        sendxmpppy "⏳ Starting build for ${PACKAGE}/${VERSION} for $DISTRIB/$BRANCH/$arch ..."
         if ! build $arch
         then
-            sendxmpppy "❌  Failed   build for ${package}/${version} for $DISTRIB/$BRANCH/$ARCH ?!"
-            critical "Failed to build ${package}/${version} for $DISTRIB/$BRANCH/$ARCH"
+            sendxmpppy "❌  Failed   build for ${PACKAGE}/${VERSION} for $DISTRIB/$BRANCH/$arch ?!"
+            critical "Failed to build ${PACKAGE}/${VERSION} for $DISTRIB/$BRANCH/$arch"
         fi
 
-        if reprepro --waitforlock 6 -b $REPO_DIR -C $BRANCH include $DISTRIB ${ROOT_DIR}/${PACKAGE}_${VERSION}_$arch.changes
+        if [[ $arch == "all" ]]
         then
-            sendxmpppy "✔️  Completed build for ${package}/${version} for $DISTRIB/$BRANCH/$ARCH."
+            changearch="amd64"
         else
-            sendxmpppy "❌ Failed to include change of ${package}/${version} for $DISTRIB/$BRANCH/$ARCH ?!"
+            changearch=$arch
+        fi
+
+        if reprepro --waitforlock 6 -b $REPO_DIR -C $BRANCH include $DISTRIB ${ROOT_DIR}/${PACKAGE}_${VERSION}_$changearch.changes
+        then
+            sendxmpppy "✔️  Completed build for ${PACKAGE}/${VERSION} for $DISTRIB/$BRANCH/$arch."
+        else
+            sendxmpppy "❌ Failed to include change of ${PACKAGE}/${VERSION} for $DISTRIB/$BRANCH/$arch ?!"
         fi
     done
 }
@@ -78,14 +86,24 @@ function build()
 {
     local arch=$1
 
-    if [[ "$arch" == "all" ]]
+    local opts=""
+
+    opts+=" -d $DISTRIB"
+    opts+=" --no-run-lintian"
+    opts+=" --no-run-piuparts"
+    opts+=" --no-run-autopkgtest"
+
+    if [[ "$arch" != "all" ]]
     then
-        local arch_opt=""
-    else
-        local arch_opt="--host=$arch"
+        opts+=" --host=$arch"
     fi
-    
-    sbuild $arch_opt -d $DISTRIB # --anything-failed-commands='%s' 
+
+    if [[ -n "$DEBUG" ]]
+    then
+        opts+="--anything-failed-commands='%s'"
+    fi
+
+    sbuild $opts
 }
 
 

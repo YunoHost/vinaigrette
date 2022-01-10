@@ -1,3 +1,3 @@
-chroots/*
+.chroots
 config/keys/*
 gitrepos/*

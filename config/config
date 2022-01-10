@@ -8,6 +8,6 @@ BUILD_DEB="$HOME_VINAIGRETTE/scripts/build_deb"
 
 REPO_URL="forge.yunohost.org"
 REPO_DIR="/var/www/repo/debian"
-REPO_CONFIG=$REPO_DIR/config/distributions
+REPO_CONFIG=$REPO_DIR/conf/distributions
 REPO_ARCHS="$(grep "Architectures" $REPO_CONFIG  | head -n 1 | awk -F: '{print $2}' | sed 's/source//g')"
 
