@@ -1,0 +1,11 @@
+#!/bin/bash
+
+
+
+# FIXME : to be replaced with 
+
+# sbuild-createchroot --include=eatmydata,ccache $DIST /some/location
+# sbuild-createchroot --include=eatmydata,ccache --arch=$ARCH $DIST /some/location
+# + check how to preinstall dependencies
+
+
