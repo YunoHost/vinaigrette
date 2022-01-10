@@ -1,38 +1,13 @@
 #!/bin/bash
 
-# Identity
-
-DEBSIGN_KEYID=59A3E6FF
-DEBFULLNAME="YunoHost Contributors"
-DEBEMAIL="contrib@yunohost.org"
 MAIL="rebuildd@yunohost.org"
-REPO_URL="forge.yunohost.org"
-
-# Codenames, components and architectures
-
-AVAILABLE_CODENAMES="buster bullseye"
-AVAILABLE_COMPONENTS="stable testing unstable extra"
-AVAILABLE_ARCH="amd64 i386 armel armhf arm64"
-
-DEFAULT_COMPONENT="unstable"
-DEFAULT_ARCH="amd64"
-
-# Folders...
 
 HOME_VINAIGRETTE="/home/vinaigrette"
 GIT_REPOS="$HOME_VINAIGRETTE/gitrepos/"
-REPO_DIR="/var/www/repo/debian"
-
-PBUILDER_HOME="$HOME_VINAIGRETTE/scripts/pbuilder/"
-PBUILDER_CHROOTS="$HOME_VINAIGRETTE/chroots/"
-PBUILDER_RESULTS="$PBUILDER_HOME/result"
-DAILY_PACKAGES="$PBUILDER_HOME/packages/"
-PBUILDER_CONF="$HOME_VINAIGRETTE/config/pbuilder/"
-
-# Scripts
-
-BUILD_SOURCES="$PBUILDER_HOME/build-sources"
 BUILD_DEB="$HOME_VINAIGRETTE/scripts/build_deb"
-INCLUDE_CHANGES="$HOME_VINAIGRETTE/scripts/repo/include-changes"
 
+REPO_URL="forge.yunohost.org"
+REPO_DIR="/var/www/repo/debian"
+REPO_CONFIG=$REPO_DIR/conf/distributions
+REPO_ARCHS="$(grep "Architectures" $REPO_CONFIG  | head -n 1 | awk -F: '{print $2}' | sed 's/source//g')"
 

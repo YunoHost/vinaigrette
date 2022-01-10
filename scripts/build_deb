@@ -4,15 +4,10 @@ readonly THISSCRIPT=$0
 readonly DISTRIB=$1
 readonly BRANCH=$2
 readonly FOLDER=$3
+readonly ARCHS=$4
 
 source /home/vinaigrette/config/config
 source /home/vinaigrette/scripts/common.sh
-
-export DEBSIGN_KEYID
-export DEBFULLNAME
-export DEBEMAIL
-
-readonly IMG="${PBUILDER_CHROOTS}/${DISTRIB}-amd64.tgz"
 
 # ##### #
 # Usage #
@@ -26,65 +21,90 @@ Usage:
   $THISSCRIPT <distrib> <branch> <folder>
 
 Arguments:
-  <distrib>     buster or bullseye
-  <branch>      stable, testing, or unstable
-  <folder>      the folder in which to build...
+  <distrib>         buster or bullseye
+  <branch>          stable, testing, or unstable
+  <folder>          the folder in which to build...
+  <archs>           list of archs to build (or empty for autodetect). For example: amd63,armhf
 EOF
 }
 
 
 function main()
 {
-    validate_arguments
-    retrieve_package_info
-    build_sources
-    add_to_reprepro
+    grep -q "^Codename: $DISTRIB$" $REPO_CONFIG || critical "Invalid distribution $DISTRIB"
+    grep -q "^Components: .*$BRANCH.*$" $REPO_CONFIG || critical "Invalid branch $BRANCH"
+    [[ -n "$FOLDER" ]] || critical "Need a folder in which to build"
 
-    success "Build will start soon. See 'rebuildd-job list | tail'"
-    sendxmpppy "➕   Added   build for ${PACKAGE}/${VERSION} for ${DISTRIB}/${BRANCH} ..."
-}
-
-# ################# #
-# Check user inputs #
-# ################# #
-
-function validate_arguments()
-{
-    [[ $DISTRIB =~ ^buster|bullseye$ ]] || critical "Invalid distribution $DISTRIB"
-    [[ $BRANCH =~ ^testing|stable|unstable$ ]] || critical "Invalid branch $BRANCH"
-    [[ ! -z "$FOLDER" ]] || critical "Need a folder in which to build"
-}
-
-function retrieve_package_info()
-{
     readonly PKG_DIR=$(readlink -fn $FOLDER)
     readonly ROOT_DIR=$(readlink -fn ${PKG_DIR}/../)
     cd $PKG_DIR
 
     readonly PACKAGE=$(dpkg-parsechangelog | awk '/^Source: / {print $2}')
     readonly VERSION=$(dpkg-parsechangelog | awk '/^Version: / {print $2}')
-    readonly CHANGES_FILE=${ROOT_DIR}/${PACKAGE}_${VERSION}_source.changes
+
+    boxed "Building ${PACKAGE} ${VERSION} ..."
+
+    if [[ -n "$ARCHS" ]]
+    then
+        archs="$(echo $ARCHS | tr ',' ' ')"
+        # Architecture-agnostic packages have 'architecture: all' in their control files
+        # others have 'architecture: any'
+    elif grep -q "Architecture: all" $PKG_DIR/debian/control
+    then
+        archs="all"
+    else
+        archs="$REPO_ARCHS"
+    fi
+
+    for arch in $archs
+    do
+        sendxmpppy "⏳ Starting build for ${PACKAGE}/${VERSION} for $DISTRIB/$BRANCH/$arch ..."
+        if ! build $arch
+        then
+            sendxmpppy "❌  Failed   build for ${PACKAGE}/${VERSION} for $DISTRIB/$BRANCH/$arch ?!"
+            critical "Failed to build ${PACKAGE}/${VERSION} for $DISTRIB/$BRANCH/$arch"
+        fi
+
+        if [[ $arch == "all" ]]
+        then
+            changearch="amd64"
+        else
+            changearch=$arch
+        fi
+
+        if reprepro --waitforlock 6 -b $REPO_DIR -C $BRANCH include $DISTRIB ${ROOT_DIR}/${PACKAGE}_${VERSION}_$changearch.changes
+        then
+            sendxmpppy "✔️  Completed build for ${PACKAGE}/${VERSION} for $DISTRIB/$BRANCH/$arch."
+        else
+            sendxmpppy "❌ Failed to include change of ${PACKAGE}/${VERSION} for $DISTRIB/$BRANCH/$arch ?!"
+        fi
+    done
 }
 
-# ######################################## #
-# Invoke pbuilder to build the sources ... #
-# ######################################## #
 
-function build_sources()
+function build()
 {
-    boxed "Building source package of ${PACKAGE} ${VERSION} ..."
+    local arch=$1
 
-    pbuilder execute --bindmounts ${ROOT_DIR} --basetgz ${IMG} -- ${BUILD_SOURCES} $PKG_DIR \
-	    || { sendxmpppy "❌ Failed to build source package for $PACKAGE"; critical "An error occured while building source package"; }
+    local opts=""
 
-    [[ -f ${CHANGES_FILE} ]] || { sendxmpppy "❌ Failed to build source package for $PACKAGE"; critical "An error occured while building source package (no change file available)"; }
+    opts+=" -d $DISTRIB"
+    opts+=" --no-run-lintian"
+    opts+=" --no-run-piuparts"
+    opts+=" --no-run-autopkgtest"
+
+    if [[ "$arch" != "all" ]]
+    then
+        opts+=" --host=$arch"
+    fi
+
+    if [[ -n "$DEBUG" ]]
+    then
+        opts+="--anything-failed-commands='%s'"
+    fi
+
+    sbuild $opts
 }
 
-function add_to_reprepro()
-{
-    boxed "Adding ${PACKAGE}_${VERSION} to ${DISTRIB}/${BRANCH}..."
-
-    $INCLUDE_CHANGES $DISTRIB $BRANCH $CHANGES_FILE || { sendxmpppy "❌ Failed to include changes for source package $PACKAGE"; critical "An error occured while including source package"; }
-}
 
 [[ "$1" =~ ^-h|--help$ ]] && (usage; exit 0) || main

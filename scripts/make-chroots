@@ -1,0 +1,8 @@
+#!/bin/bash
+
+DIST=$1
+PREINSTALL="eatmydata,ccache,build-essential,perl-openssl-defaults,debhelper,cmake,wget,devscripts,git,aptitude,debhelper,dh-python,python3-all,python3-yaml,python3-jinja2,python3-setuptools,python3-psutil,lua5.1,liblua5.1-0-dev,libidn11-dev,libssl-dev,txt2man,quilt,npm,nodejs"
+
+mkdir -p /home/vinaigrette/.chroots/
+
+sbuild-createchroot --include=$PREINSTALL $DIST /home/vinaigrette/.chroots/$DIST-all

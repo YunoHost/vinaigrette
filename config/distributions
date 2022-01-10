@@ -10,7 +10,6 @@ Description: YunoHost repository for Debian Buster
 SignWith: 59A3E6FF
 Tracking: all includechanges keepsources
 Log: logfile
- --changes --via=include /home/vinaigrette/scripts/repo/process-include
 
 Origin: YunoHost
 Label: YunoHost for Bullseye
@@ -24,4 +23,3 @@ Description: YunoHost repository for Debian Bullseye
 SignWith: 83BD9E70
 Tracking: all includechanges keepsources
 Log: logfile
- --changes --via=include /home/vinaigrette/scripts/repo/process-include
