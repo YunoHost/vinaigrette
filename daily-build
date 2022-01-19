@@ -43,8 +43,8 @@ function build_if_needed()
     local DISTRIB=$2
     local LAST_BUILD_FOR_THIS_PACKAGE=$LAST_BUILDS_CACHE/${DISTRIB}_${PACKAGE}
 
-    BRANCH_NIGHTLY="$DISTRIB"
-    [[ $DISTRIB == "buster" ]] && BRANCH_NIGHTLY="dev"
+    [[ $DISTRIB == "buster" ]] && BRANCH_NIGHTLY="buster"
+    [[ $DISTRIB == "bullseye" ]] && BRANCH_NIGHTLY="dev"
 
     cd $GIT_REPOS/$PACKAGE
 
