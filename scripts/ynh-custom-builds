@@ -42,7 +42,7 @@ function main()
 
 function validate_arguments()
 {
-    [[ $PACKAGE =~ ^metronome|miniupnpc|gevent-websocket|python-zeroconf|lexicon$ ]] || critical "Invalid package $PACKAGE"
+    [[ $PACKAGE =~ ^metronome|python-zeroconf|lexicon$ ]] || critical "Invalid package $PACKAGE"
     [[ $BRANCH =~ ^testing|stable|unstable$ ]] || critical "Invalid branch $BRANCH"
     [[ "$(tty)" != "not a tty" ]] || critical "You aint in a tty (are you in a 'lxc exec' ?) The script can't run because pbuilder won't be happy :|"
 }
@@ -61,15 +61,15 @@ function tweak_lexicon()
     readonly VERSION="$(dpkg-parsechangelog -S Version 2>/dev/null)+ynh$DISTRIB_N-1"
 }
 
-function tweak_miniupnpc()
-{
-    readonly VERSION="$(dpkg-parsechangelog -S Version 2>/dev/null)+ynh$DISTRIB_N"
-}
+#function tweak_miniupnpc()
+#{
+#    readonly VERSION="$(dpkg-parsechangelog -S Version 2>/dev/null)+ynh$DISTRIB_N"
+#}
 
-function tweak_gevent-websocket()
-{
-    readonly VERSION="$(dpkg-parsechangelog -S Version 2>/dev/null)+ynh$DISTRIB_N"
-}
+#function tweak_gevent-websocket()
+#{
+#    readonly VERSION="$(dpkg-parsechangelog -S Version 2>/dev/null)+ynh$DISTRIB_N"
+#}
 
 function tweak_metronome()
 {
