@@ -23,6 +23,12 @@ The build chain relies on `sbuild`, a wrapper tool for building the `.deb`, and 
 Troubleshooting
 ---------------
 
+#### Debugging apt/dpkg being in broken state in the chroot
+
+If you savagely Ctrl+C during a build, dpkg/apt may end up in a broken state
+
+You can debug this by entering the chroot with `schroot -c $DIST-amd64-sbuild`
+
 #### Relaunching a build manually with a shell ?
 
 If a build fails and needs to be debugged, you should run `export DEBUG=true`, and re-run the appropriate build command. This should add the option `--anything-failed-commands='%s'` to the `sbuild` command, which will then drop you in an interactive shell inside the chroot, right after the failure. This should help investigate what's happening.
