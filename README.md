@@ -19,6 +19,21 @@ The build chain relies on `sbuild`, a wrapper tool for building the `.deb`, and 
 5. ???
 6. PROFIT!
 
+Including a .deb from an external source
+----------------------------------------
+
+For example with rspamd : 
+
+1. Obtain the .deb from some other source (possibly for different architectures)
+
+2. Include it in the repo (tweak the `--component`, `--architecture`, distname, ... if needed)
+
+```
+reprepro --component testing --architecture armhf -Vb /var/www/repo/debian includedeb bullseye remote-deb/rspamd_3.2-1~bpo11+1_armhf.deb
+reprepro --component testing --architecture arm64 -Vb /var/www/repo/debian includedeb bullseye remote-deb/rspamd_3.2-1~bpo11+1_arm64.deb
+reprepro --component testing --architecture amd64 -Vb /var/www/repo/debian includedeb bullseye remote-deb/rspamd_3.2-1~bpo11+1_amd64.deb
+reprepro --component testing --architecture i386  -Vb /var/www/repo/debian includedeb bullseye remote-deb/rspamd_3.2-1~bpo11+1_i386.deb
+```
 
 Troubleshooting
 ---------------
