@@ -21,7 +21,7 @@ Usage:
   $THISSCRIPT <distrib> <branch> <folder>
 
 Arguments:
-  <distrib>         buster or bullseye
+  <distrib>         buster or bullseye or bookworm
   <branch>          stable, testing, or unstable
   <folder>          the folder in which to build...
   <archs>           list of archs to build (or empty for autodetect). For example: amd63,armhf

@@ -23,3 +23,16 @@ Description: YunoHost repository for Debian Bullseye
 SignWith: 83BD9E70
 Tracking: all includechanges keepsources
 Log: logfile
+
+Origin: YunoHost
+Label: YunoHost for Bookworm
+Suite: stable
+Codename: bookworm
+Version: 12.0
+Architectures: i386 amd64 armhf arm64 source
+Components: stable testing unstable extra
+AlsoAcceptFor: bookworm-stable bookworm-testing bookworm-unstable stable testing unstable
+Description: YunoHost repository for Debian Bookworm
+SignWith: 3DAC3BD5
+Tracking: all includechanges keepsources
+Log: logfile

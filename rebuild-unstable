@@ -1,7 +1,7 @@
 #!/bin/bash
 
 readonly THISSCRIPT=$0
-readonly DISTRIBS="buster bullseye"
+readonly DISTRIBS="buster bullseye bookworm"
 readonly TIMETAG="$(date +%Y%m%d%H%M)"
 readonly PACKAGES="moulinette SSOwat yunohost yunohost-admin"
 readonly FORCE="false"
@@ -45,6 +45,7 @@ function build_if_needed()
 
     [[ $DISTRIB == "buster" ]] && BRANCH_NIGHTLY="buster"
     [[ $DISTRIB == "bullseye" ]] && BRANCH_NIGHTLY="dev"
+    [[ $DISTRIB == "bookworm" ]] && BRANCH_NIGHTLY="bookworm"
 
     cd $GIT_REPOS/$PACKAGE
 
