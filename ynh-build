@@ -51,7 +51,7 @@ function validate_arguments()
     [[ $PROJECT =~ ^yunohost|yunohost-admin|moulinette|SSOwat$ ]] || critical "Invalid project $PROJECT"
     grep -q "^Codename: $DISTRIB$" $REPO_CONFIG || critical "Invalid distribution $DISTRIB"
     grep -q "^Components: .*$BRANCH.*$" $REPO_CONFIG || critical "Invalid branch $BRANCH"
-    [[ ! -z "$VERSION" ]] || critical "Invalid version $VERSION"
+    [[ -n "$VERSION" ]] || critical "Invalid version $VERSION"
     [[ "$(tty)" != "not a tty" ]] || critical "You aint in a tty (are you in a 'lxc exec' ?) The script can't run because pbuilder won't be happy :|"
 }
 
