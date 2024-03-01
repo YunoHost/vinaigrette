@@ -83,7 +83,7 @@ function checkout_tag()
 function build()
 {
    # check if the build branch type is coherent between what the user has specified and what is entered in the changelog
-   if ! [[ $(head -n 1 debian/changelog == *"$BRANCH"*) ]]; then
+   if ! [[ "$(head -n 1 debian/changelog)" == *"$BRANCH"* ]]; then
       echo "The specified branch type is not coherent with the changelog one!"
       exit 1
    fi
