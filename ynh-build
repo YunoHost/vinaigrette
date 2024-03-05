@@ -6,10 +6,7 @@ readonly BRANCH=$2
 readonly VERSION=$3
 readonly TAG=$(echo "debian/$VERSION" | tr '~' '-')
 
-if [[ "$(echo $VERSION | awk -F'.' '{print $1}')" == "4" ]]
-then
-	readonly DISTRIB="buster"
-elif [[ "$(echo $VERSION | awk -F'.' '{print $1}')" == "11" ]]
+if [[ "$(echo $VERSION | awk -F'.' '{print $1}')" == "11" ]]
 then
 	readonly DISTRIB="bullseye"
 elif [[ "$(echo $VERSION | awk -F'.' '{print $1}')" == "12" ]]
