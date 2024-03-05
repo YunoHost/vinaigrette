@@ -48,7 +48,7 @@ function validate_arguments()
     [[ $PROJECT =~ ^yunohost|yunohost-admin|moulinette|SSOwat$ ]] || critical "Invalid project $PROJECT"
     grep -q "^Codename: $DISTRIB$" $REPO_CONFIG || critical "Invalid distribution $DISTRIB"
     grep -q "^Components: .*$BRANCH.*$" $REPO_CONFIG || critical "Invalid branch $BRANCH"
-    [[ ! -z "$VERSION" ]] || critical "Invalid version $VERSION"
+    [[ -n "$VERSION" ]] || critical "Invalid version $VERSION"
     [[ "$(tty)" != "not a tty" ]] || critical "You aint in a tty (are you in a 'lxc exec' ?) The script can't run because pbuilder won't be happy :|"
 }
 
@@ -79,6 +79,12 @@ function checkout_tag()
 
 function build()
 {
+   # check if the build branch type is coherent between what the user has specified and what is specified in the changelog
+   if ! [[ "$(head -n 1 debian/changelog)" == *"$BRANCH"* ]]; then
+      echo "The specified branch type is not coherent with the changelog one!"
+      exit 1
+   fi
+
    # Create temporary folder
    TMP_FOLDER=$(mktemp -d)
 
