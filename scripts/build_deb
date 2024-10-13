@@ -58,7 +58,7 @@ function main()
 
     for arch in $archs
     do
-        sendxmpppy "⏳ Starting build for ${PACKAGE}/${VERSION} for $DISTRIB/$BRANCH/$arch ..."
+        sendxmpppy "🏗️ Starting build for ${PACKAGE}/${VERSION} for $DISTRIB/$BRANCH/$arch ..."
         if ! build $arch
         then
             sendxmpppy "❌  Failed   build for ${PACKAGE}/${VERSION} for $DISTRIB/$BRANCH/$arch ?!"
