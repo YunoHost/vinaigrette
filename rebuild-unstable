@@ -3,7 +3,7 @@
 readonly THISSCRIPT=$0
 readonly DISTRIBS="bullseye bookworm"
 readonly TIMETAG="$(date +%Y%m%d%H%M)"
-readonly PACKAGES="moulinette SSOwat yunohost yunohost-admin"
+readonly PACKAGES="moulinette SSOwat yunohost yunohost-admin yunohost-portal"
 readonly FORCE="false"
 readonly LAST_BUILDS_CACHE="/var/cache/vinaigrette/last_builds/"
 
@@ -45,6 +45,16 @@ function build_if_needed()
 
     [[ $DISTRIB == "bullseye" ]] && BRANCH_NIGHTLY="dev"
     [[ $DISTRIB == "bookworm" ]] && BRANCH_NIGHTLY="bookworm"
+
+    if [[ $PACKAGE == "yunohost-portal" ]]
+    then
+        if [[ $DISTRIB != "bookworm" ]]
+        then
+            return
+        else
+            BRANCH_NIGHTLY="dev"
+        fi
+    fi
 
     cd $GIT_REPOS/$PACKAGE
 
