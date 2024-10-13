@@ -110,4 +110,3 @@ function main()
 }
 
 [[ "$1" =~ ^-h|--help$ ]] && usage || main
-
