@@ -6,10 +6,10 @@ Build those damn .deb's
 How this shit works
 -------------------
 
-The build chain relies on `sbuild`, a wrapper tool for building the `.deb`, and `reprepro` to handle the apt repo part (signing and serving) 
+The build chain relies on `sbuild`, a wrapper tool for building the `.deb`, and `reprepro` to handle the apt repo part (signing and serving)
 
 1. Initially, some chroots are prepared, one per available distribution (buster, bullseye, ...), pre-installed with build dependencies to speed up builds. See the `scripts/make-chroots` script.
-2. `reprepro` is configured in [`/var/www/repo/debian/conf/distributions`](config/distributions). In this file, you'll find the supported distributions (aka codenames), and branches (aka components: stable, testing, unstable). It also declares what GPG key to use to sign the repo. 
+2. `reprepro` is configured in [`/var/www/repo/debian/conf/distributions`](config/distributions). In this file, you'll find the supported distributions (aka codenames), and branches (aka components: stable, testing, unstable). It also declares what GPG key to use to sign the repo.
 3. Upstream codes are kept in `gitrepos/`
 4. Builds are launched, either manually via `./ynh-build` and `scripts/ynh-custom-builds` - or via a cron job (c.f. `./daily-build` which in fact runs every 15ish mins?)
     - These scripts usually perform consistency checks, or tweak the changelog / version number, and then call `scripts/build_deb`, itself calling `sbuild` and `reprepro include`
@@ -19,10 +19,45 @@ The build chain relies on `sbuild`, a wrapper tool for building the `.deb`, and 
 5. ???
 6. PROFIT!
 
+Setup
+-----
+
+```bash
+# Dependencies
+apt-get install sbuild schroot reprepro gawk -y
+apt-get install python-virtualenv python3-pip -y
+apt-get install boxes -y
+
+# Import the keys
+gpg --import FOOBAR.key
+gpg --import FOOBAR.pub
+
+# Clode the repos
+pushd gitrepos/
+    git clone https://github.com/yunohost/yunohost
+    git clone https://github.com/yunohost/yunohost-admin
+    git clone https://github.com/yunohost/yunohost-portal
+    git clone https://github.com/yunohost/ssowat SSOwat
+    git clone https://github.com/yunohost/moulinette
+popd
+
+# Link debian repo conf
+ln -s $PWD/config/distributions <some_www_exposed_path>/debian/conf/distributions
+
+# Create the chroots using scripts/make-chroots
+pushd scripts
+    bash make-chroots bullseye
+    bash make-chroots bookworm
+popd
+
+# Add this in /etc/crontab :
+# */15 *	* * *	root    (cd <path_to_vinaigrette> && date && ./rebuild-unstable) >> /var/log/rebuild-unstable.log
+```
+
 Including a .deb from an external source
 ----------------------------------------
 
-For example with rspamd : 
+For example with rspamd :
 
 1. Obtain the .deb from some other source (possibly for different architectures)
 

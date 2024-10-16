@@ -1,13 +1,14 @@
 #!/bin/bash
 
 readonly THISSCRIPT=$0
+readonly THISDIR=$(dirname $0)
 readonly DISTRIB=$1
 readonly BRANCH=$2
 readonly FOLDER=$3
 readonly ARCHS=$4
 
-source /home/vinaigrette/config/config
-source /home/vinaigrette/scripts/common.sh
+source $THISDIR/../config/config
+source $THISDIR/common.sh
 
 # ##### #
 # Usage #

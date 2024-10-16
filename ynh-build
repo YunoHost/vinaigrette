@@ -1,6 +1,7 @@
 #!/bin/bash
 
 readonly THISSCRIPT=$0
+readonly THISDIR=$(dirname $0)
 readonly PROJECT=$1
 readonly BRANCH=$2
 readonly VERSION=$3
@@ -17,8 +18,8 @@ else
 fi
 
 
-source /home/vinaigrette/config/config
-source /home/vinaigrette/scripts/common.sh
+source $THISDIR/config/config
+source $THISDIR/scripts/common.sh
 
 # ##### #
 # Usage #
