@@ -32,7 +32,7 @@ Usage:
   $THISSCRIPT <project> <branch> <version>
 
 Arguments:
-  <project>     moulinette, yunohost, yunohost-admin or SSOwat
+  <project>     moulinette, yunohost, yunohost-admin, yunohost-portal or SSOwat
   <branch>      testing or stable
   <version>     x.y.z (ex: 2.6.1)
 
@@ -45,7 +45,7 @@ EOF
 
 function validate_arguments()
 {
-    [[ $PROJECT =~ ^yunohost|yunohost-admin|moulinette|SSOwat$ ]] || critical "Invalid project $PROJECT"
+    [[ $PROJECT =~ ^yunohost|yunohost-admin|yunohost-portal|moulinette|SSOwat$ ]] || critical "Invalid project $PROJECT"
     grep -q "^Codename: $DISTRIB$" $REPO_CONFIG || critical "Invalid distribution $DISTRIB"
     grep -q "^Components: .*$BRANCH.*$" $REPO_CONFIG || critical "Invalid branch $BRANCH"
     [[ -n "$VERSION" ]] || critical "Invalid version $VERSION"
@@ -110,4 +110,3 @@ function main()
 }
 
 [[ "$1" =~ ^-h|--help$ ]] && usage || main
-
