@@ -101,7 +101,7 @@ function build()
 
     if [[ -n "$DEBUG" ]]
     then
-        opts+="--anything-failed-commands='%s'"
+        opts+=" --anything-failed-commands='%s'"
     fi
 
     sbuild $opts

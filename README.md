@@ -24,9 +24,7 @@ Setup
 
 ```bash
 # Dependencies
-apt-get install sbuild schroot reprepro gawk -y
-apt-get install python-virtualenv python3-pip -y
-apt-get install boxes -y
+apt-get install sbuild schroot reprepro gawk debhelper dh-python boxes -y --no-install-recommends
 
 # Import the keys
 gpg --import FOOBAR.key
