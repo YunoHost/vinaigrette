@@ -79,6 +79,12 @@ function checkout_tag()
 
 function build()
 {
+   # check if the build branch type is coherent between what the user has specified and what is specified in the changelog
+   if ! [[ "$(head -n 1 debian/changelog)" == *"$BRANCH"* ]]; then
+      echo "The specified branch type is not coherent with the changelog one!"
+      exit 1
+   fi
+
    # Create temporary folder
    TMP_FOLDER=$(mktemp -d)
 
