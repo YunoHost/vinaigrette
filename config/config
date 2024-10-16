@@ -7,7 +7,7 @@ readonly BUILD_DEB="$HOME_VINAIGRETTE/scripts/build_deb"
 
 readonly REPO_URL="forge.yunohost.org"
 readonly REPO_DIR="$HOME_VINAIGRETTE/../www/"
-readonly REPO_CONFIG=$REPO_DIR/conf/distributions
+readonly REPO_CONFIG=$HOME_VINAIGRETTE/config/distributions
 readonly REPO_ARCHS="$(grep "Architectures" $REPO_CONFIG  | head -n 1 | awk -F: '{print $2}' | sed 's/source//g')"
 readonly REPO_DISTS="$(grep "^Codename" $REPO_CONFIG | awk '{print $2}')"
 
