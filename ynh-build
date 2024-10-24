@@ -1,25 +1,24 @@
 #!/bin/bash
+# shellcheck disable=SC2155
 
 readonly THISSCRIPT=$0
-readonly THISDIR=$(dirname $0)
+readonly THISDIR=$(dirname "$0")
 readonly PROJECT=$1
 readonly BRANCH=$2
 readonly VERSION=$3
 readonly TAG=$(echo "debian/$VERSION" | tr '~' '-')
 
-if [[ "$(echo $VERSION | awk -F'.' '{print $1}')" == "11" ]]
-then
-	readonly DISTRIB="bullseye"
-elif [[ "$(echo $VERSION | awk -F'.' '{print $1}')" == "12" ]]
-then
-	readonly DISTRIB="bookworm"
+if [[ "$(echo "$VERSION" | awk -F'.' '{print $1}')" == "11" ]]; then
+    readonly DISTRIB="bullseye"
+elif [[ "$(echo "$VERSION" | awk -F'.' '{print $1}')" == "12" ]]; then
+    readonly DISTRIB="bookworm"
 else
-	readonly DISTRIB="fixyoversionnumberbruh"
+    readonly DISTRIB="fixyoversionnumberbruh"
 fi
 
 
-source $THISDIR/config/config
-source $THISDIR/scripts/common.sh
+source "$THISDIR/config/config"
+source "$THISDIR/scripts/common.sh"
 
 # ##### #
 # Usage #
@@ -30,12 +29,12 @@ function usage()
     cat << EOF
 
 Usage:
-  $THISSCRIPT <project> <branch> <version>
+    $THISSCRIPT <project> <branch> <version>
 
 Arguments:
-  <project>     moulinette, yunohost, yunohost-admin, yunohost-portal or SSOwat
-  <branch>      testing or stable
-  <version>     x.y.z (ex: 2.6.1)
+    <project>     moulinette, yunohost, yunohost-admin, yunohost-portal or SSOwat
+    <branch>      testing or stable
+    <version>     x.y.z (ex: 2.6.1)
 
 EOF
 }
@@ -47,8 +46,8 @@ EOF
 function validate_arguments()
 {
     [[ $PROJECT =~ ^yunohost|yunohost-admin|yunohost-portal|moulinette|SSOwat$ ]] || critical "Invalid project $PROJECT"
-    grep -q "^Codename: $DISTRIB$" $REPO_CONFIG || critical "Invalid distribution $DISTRIB"
-    grep -q "^Components: .*$BRANCH.*$" $REPO_CONFIG || critical "Invalid branch $BRANCH"
+    grep -q "^Codename: $DISTRIB$" "$REPO_CONFIG" || critical "Invalid distribution $DISTRIB"
+    grep -q "^Components: .*$BRANCH.*$" "$REPO_CONFIG" || critical "Invalid branch $BRANCH"
     [[ -n "$VERSION" ]] || critical "Invalid version $VERSION"
     [[ "$(tty)" != "not a tty" ]] || critical "You aint in a tty (are you in a 'lxc exec' ?) The script can't run because pbuilder won't be happy :|"
 }
@@ -58,11 +57,11 @@ function checkout_tag()
     # Update project's repository
     boxed "> Updating $GIT_REPOS/$PROJECT repository ... "
 
-    cd $GIT_REPOS/$PROJECT
+    cd "$GIT_REPOS/$PROJECT" || exit 1
     git fetch --quiet
     git fetch --tags --quiet
-    git checkout $TAG --quiet
-    git reset --hard $TAG --quiet
+    git checkout "$TAG" --quiet
+    git reset --hard "$TAG" --quiet
 
     # Validate constrains for the version number given (is in changelog + has corresponding tag)
 
@@ -91,12 +90,12 @@ function build()
 
    # Extract git archive a desired tag
    info "Exporting in $TMP_FOLDER ...  "
-   git archive $TAG --format=tar | tar -x -C $TMP_FOLDER
+   git archive "$TAG" --format=tar | tar -x -C "$TMP_FOLDER"
 
    # Build Debian package
    boxed "Building Debian package ... "
-   cd $TMP_FOLDER
-   $BUILD_DEB $DISTRIB $BRANCH .
+   cd "$TMP_FOLDER" || exit 1
+   $BUILD_DEB $DISTRIB "$BRANCH" .
 }
 
 
@@ -110,4 +109,9 @@ function main()
     build
 }
 
-[[ "$1" =~ ^-h|--help$ ]] && usage || main
+if [[ "$1" =~ ^-h|--help$ ]]; then
+    usage
+    exit
+fi
+
+main

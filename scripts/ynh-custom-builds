@@ -1,14 +1,17 @@
 #!/bin/bash
+# shellcheck disable=SC2155,SC2034
 
 readonly THISSCRIPT=$0
-readonly THISDIR=$(dirname $0)
+readonly THISDIR=$(dirname "$0")
 readonly PACKAGE=$1
 readonly BRANCH=$2
 readonly DISTRIB="bookworm"
 readonly DISTRIB_N="12"
 
-source $THISDIR/../config/config
-source $THISDIR/common.sh
+# shellcheck source=config/config
+source "$THISDIR/../config/config"
+# shellcheck source=scripts/common.sh
+source "$THISDIR/common.sh"
 
 # ##### #
 # Usage #
@@ -31,8 +34,8 @@ EOF
 function main()
 {
     validate_arguments
-    cd $GIT_REPOS/$PACKAGE
-    tweak_$PACKAGE
+    cd "$GIT_REPOS/$PACKAGE" || exit 1
+    "tweak_$PACKAGE"
     build
 }
 
@@ -79,9 +82,9 @@ function tweak_metronome()
 function build()
 {
     # SVERSION is VERSION without the -1 at the end ...
-    local SVERSION=$(echo $VERSION | tr '-' ' ' | awk '{print $1}')
+    local SVERSION=$(echo "$VERSION" | tr '-' ' ' | awk '{print $1}')
 
-    cd $GIT_REPOS/$PACKAGE
+    cd "$GIT_REPOS/$PACKAGE" || exit 1
 
     # Tweak the changelog temporarily
     info "Setting version in changelog to ${VERSION}"
@@ -101,21 +104,26 @@ function build()
     # Extract git archive a desired tag
     info "Exporting in $TMP_FOLDER ...  "
     git ls-files | xargs tar -czf archive.tar.gz
-    cat archive.tar.gz | tar -xz -C $TMP_FOLDER
+    tar xzf archive.tar.gz -C "$TMP_FOLDER"
     # For some reason, these wants archive named
     # e.g. metronome_x.y.z+stuff.orig.tar.gz
     # in the parent folder...
-    mv archive.tar.gz $TMP_FOLDER/../${PACKAGE}_${SVERSION}.orig.tar.gz
+    mv archive.tar.gz "$TMP_FOLDER/../${PACKAGE}_${SVERSION}.orig.tar.gz"
 
     # Build Debian package
-    cd $TMP_FOLDER
-    $BUILD_DEB $DISTRIB $BRANCH .
+    cd "$TMP_FOLDER" || exit 1
+    $BUILD_DEB $DISTRIB "$BRANCH" .
 
     # Restore changelog
     info "Restoring previous changelog"
-    cd $GIT_REPOS/$PACKAGE
+    cd "$GIT_REPOS/$PACKAGE" || exit 1
     cp debian/changelog.old debian/changelog
     rm debian/changelog.old
 }
 
-[[ "$1" =~ ^-h|--help$ ]] && (usage; exit 0) || main
+if [[ "$1" =~ ^-h|--help$ ]]; then
+    usage
+    exit
+fi
+
+main
