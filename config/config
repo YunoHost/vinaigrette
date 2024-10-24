@@ -1,6 +1,7 @@
 #!/bin/bash
+# shellcheck disable=SC2155,SC2034
 
-readonly HOME_VINAIGRETTE=$(dirname $(dirname $(realpath ${BASH_SOURCE[0]})))
+readonly HOME_VINAIGRETTE=$(dirname "$(dirname "$(realpath "${BASH_SOURCE[0]}")")")
 
 readonly GIT_REPOS="$HOME_VINAIGRETTE/gitrepos/"
 readonly BUILD_DEB="$HOME_VINAIGRETTE/scripts/build_deb"
@@ -8,8 +9,8 @@ readonly BUILD_DEB="$HOME_VINAIGRETTE/scripts/build_deb"
 readonly REPO_URL="forge.yunohost.org"
 readonly REPO_DIR="$HOME_VINAIGRETTE/../www/debian"
 readonly REPO_CONFIG=$HOME_VINAIGRETTE/config/distributions
-readonly REPO_ARCHS="$(grep "Architectures" $REPO_CONFIG  | head -n 1 | awk -F: '{print $2}' | sed 's/source//g')"
-readonly REPO_DISTS="$(grep "^Codename" $REPO_CONFIG | awk '{print $2}')"
+readonly REPO_ARCHS="$(grep "Architectures" "$REPO_CONFIG"  | head -n 1 | awk -F: '{print $2}' | sed 's/source//g')"
+readonly REPO_DISTS="$(grep "^Codename" "$REPO_CONFIG" | awk '{print $2}')"
 
 readonly LAST_BUILDS_CACHE="$HOME_VINAIGRETTE/.last_builds/"
 readonly CHROOTS="$HOME_VINAIGRETTE/.chroots/"

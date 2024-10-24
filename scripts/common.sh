@@ -1,3 +1,6 @@
+#!/bin/bash
+# shellcheck disable=SC2155,SC2034
+
 readonly NORMAL=$(printf '\033[0m')
 readonly BOLD=$(printf '\033[1m')
 readonly faint=$(printf '\033[2m')
@@ -23,7 +26,7 @@ function info()
 }
 
 function boxed()
-{ 
+{
   local msg=${1}
   echo "$msg" | boxes -d stone
 }
