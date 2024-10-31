@@ -14,7 +14,7 @@ function main()
 
     for PACKAGE in $PACKAGES;
     do
-        for DISTRIB in $REPO_DISTS;
+        for DISTRIB in "bookworm";
         do
             echo "-------------------------------------"
             echo "Looking for update in ${PACKAGE} for ${DISTRIB}... "
@@ -32,18 +32,8 @@ function build_if_needed()
     local DISTRIB=$2
     local LAST_BUILD_FOR_THIS_PACKAGE=$LAST_BUILDS_CACHE/${DISTRIB}_${PACKAGE}
 
-    [[ $DISTRIB == "bullseye" ]] && BRANCH_NIGHTLY="dev"
-    [[ $DISTRIB == "bookworm" ]] && BRANCH_NIGHTLY="bookworm"
-
-    if [[ $PACKAGE == "yunohost-portal" ]]
-    then
-        if [[ $DISTRIB != "bookworm" ]]
-        then
-            return
-        else
-            BRANCH_NIGHTLY="dev"
-        fi
-    fi
+    [[ $DISTRIB == "bookworm" ]] && BRANCH_NIGHTLY="dev"
+    [[ $DISTRIB == "trixie" ]] && BRANCH_NIGHTLY="trixie"
 
     cd "$GIT_REPOS/$PACKAGE" || exit 1
 
