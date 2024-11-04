@@ -4,7 +4,7 @@
 readonly THISDIR=$(dirname "$0")
 readonly TIMETAG="$(date +%Y%m%d%H%M)"
 readonly PACKAGES=(moulinette SSOwat yunohost yunohost-admin yunohost-portal)
-readonly DISTRIBS=(bookworm)
+readonly DISTRIBS=(trixie)
 readonly FORCE="false"
 
 source "$THISDIR/config/config"

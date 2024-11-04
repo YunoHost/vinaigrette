@@ -46,6 +46,7 @@ ln -s $PWD/config/distributions <some_www_exposed_path>/debian/conf/distribution
 pushd scripts
     bash make-chroots bullseye
     bash make-chroots bookworm
+    bash make-chroots trixie
 popd
 
 # Add this in /etc/crontab :

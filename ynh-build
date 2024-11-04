@@ -12,6 +12,8 @@ if [[ "$(echo "$VERSION" | awk -F'.' '{print $1}')" == "11" ]]; then
     readonly DISTRIB="bullseye"
 elif [[ "$(echo "$VERSION" | awk -F'.' '{print $1}')" == "12" ]]; then
     readonly DISTRIB="bookworm"
+elif [[ "$(echo "$VERSION" | awk -F'.' '{print $1}')" == "13" ]]; then
+    readonly DISTRIB="trixie"
 else
     readonly DISTRIB="fixyoversionnumberbruh"
 fi
