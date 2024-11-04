@@ -23,3 +23,16 @@ Description: YunoHost repository for Debian Bookworm
 SignWith: 3DAC3BD5
 Tracking: all includechanges keepsources
 Log: logfile
+
+Origin: YunoHost
+Label: YunoHost for Trixie
+Suite: stable
+Codename: trixie
+Version: 13.0
+Architectures: i386 amd64 armhf arm64 source
+Components: stable testing unstable extra
+AlsoAcceptFor: trixie-stable trixie-testing trixie-unstable stable testing unstable
+Description: YunoHost repository for Debian Trixie
+SignWith: 062612B9
+Tracking: all includechanges keepsources
+Log: logfile
