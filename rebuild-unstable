@@ -3,7 +3,8 @@
 
 readonly THISDIR=$(dirname "$0")
 readonly TIMETAG="$(date +%Y%m%d%H%M)"
-readonly PACKAGES="moulinette SSOwat yunohost yunohost-admin yunohost-portal"
+readonly PACKAGES=(moulinette SSOwat yunohost yunohost-admin yunohost-portal)
+readonly DISTRIBS=(bookworm)
 readonly FORCE="false"
 
 source "$THISDIR/config/config"
@@ -12,10 +13,8 @@ mkdir -p "$LAST_BUILDS_CACHE"
 function main()
 {
 
-    for PACKAGE in $PACKAGES;
-    do
-        for DISTRIB in "bookworm";
-        do
+    for PACKAGE in "${PACKAGES[@]}"; do
+        for DISTRIB in "${DISTRIBS[@]}"; do
             echo "-------------------------------------"
             echo "Looking for update in ${PACKAGE} for ${DISTRIB}... "
 
