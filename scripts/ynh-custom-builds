@@ -90,12 +90,13 @@ function build()
     info "Setting version in changelog to ${VERSION}"
     rm -f debian/changelog.dch
     cp debian/changelog debian/changelog.old
+    DEBEMAIL=contrib@yunohost.org \
     dch --package "${PACKAGE}" \
         --force-bad-version \
-	-v "${VERSION}" \
-	-D "${BRANCH}" \
-	--force-distribution \
-	"YunoHost custom build." \
+        -v "${VERSION}" \
+        -D "${BRANCH}" \
+        --force-distribution \
+        "YunoHost custom build." \
         > /dev/null 2>&1
 
     # Create temporary folder

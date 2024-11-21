@@ -70,6 +70,7 @@ function build_if_needed()
     echo "> Setting version in changelog to ${VERSION_NIGHTLY}"
     rm -f debian/changelog.dch
     cp debian/changelog debian/changelog.old
+    DEBEMAIL=contrib@yunohost.org \
     dch --package "${PACKAGE}" \
         --force-bad-version \
         -v "${VERSION_NIGHTLY}" \
