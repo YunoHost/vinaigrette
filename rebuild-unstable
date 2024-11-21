@@ -110,4 +110,9 @@ function build()
     $BUILD_DEB "$DISTRIB" "unstable" .
 }
 
+if pidof -x "rebuild-unstable" -o "%PPID" >/dev/null; then
+    echo "Rebuild-unstable is already running!"
+    exit 0
+fi
+
 main
