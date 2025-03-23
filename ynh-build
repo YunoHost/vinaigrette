@@ -61,7 +61,7 @@ function checkout_tag()
 
     cd "$GIT_REPOS/$PROJECT" || exit 1
     git fetch --quiet
-    git fetch --tags --quiet
+    git fetch --tags --quiet --force
     git checkout "$TAG" --quiet
     git reset --hard "$TAG" --quiet
 
