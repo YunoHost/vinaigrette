@@ -98,6 +98,8 @@ function build()
    boxed "Building Debian package ... "
    cd "$TMP_FOLDER" || exit 1
    $BUILD_DEB $DISTRIB "$BRANCH" .
+
+   rm -r "$TMP_FOLDER"
 }
 
 
