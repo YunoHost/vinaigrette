@@ -120,6 +120,8 @@ function build()
     cd "$GIT_REPOS/$PACKAGE" || exit 1
     cp debian/changelog.old debian/changelog
     rm debian/changelog.old
+
+    rm -r "$TMP_FOLDER"
 }
 
 if [[ "$1" =~ ^-h|--help$ ]]; then

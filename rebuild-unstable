@@ -109,6 +109,8 @@ function build()
     echo "> Starting build ..."
     cd "$TMP_FOLDER" || exit 1
     $BUILD_DEB "$DISTRIB" "unstable" .
+
+    rm -r "$TMP_FOLDER"
 }
 
 if pidof -x "rebuild-unstable" -o "%PPID" >/dev/null; then
