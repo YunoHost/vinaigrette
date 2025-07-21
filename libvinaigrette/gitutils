@@ -1,0 +1,67 @@
+#!/usr/bin/env bash
+
+# Fetch remote changes for a gitrepo
+git_fetch() {
+    local REPODIR=$1
+    local PROJECT_URL=$2
+
+    if [ -d "$REPODIR/.git" ]; then
+        git -C "$REPODIR" fetch --quiet
+        git -C "$REPODIR" fetch --tags --quiet --force
+    else
+        mkdir -p "$(dirname "$REPODIR")"
+        git clone "$PROJECT_URL" "$REPODIR"
+    fi
+}
+
+git_tag_exists() {
+    local REPODIR=$1
+    local TAG=$2
+
+    git -C "$REPODIR" rev-parse "$TAG" --quiet >/dev/null 2>&1
+}
+
+# Checkout TAG on REPO
+git_checkout_tag() {
+    local REPODIR=$1
+    local TAG=$2
+
+    git -C "$REPODIR" checkout "$TAG" --quiet
+    git -C "$REPODIR" reset --hard "$TAG" --quiet
+}
+
+git_checkout_branch() {
+    local REPODIR=$1
+    local BRANCH=$2
+    git -C "$REPODIR" checkout "$BRANCH" --quiet
+    git -C "$REPODIR" reset --hard "origin/$BRANCH" --quiet
+}
+
+git_assert_tag_is_head() {
+    local REPODIR=$1
+    local TAG=$2
+
+    [ "$(git -C "$REPODIR" rev-parse "$TAG")" == "$(git -C "$REPODIR" rev-parse "HEAD")" ]
+}
+
+check_build_needed() {
+    local FLAG_FILE=$1
+    local REPODIR=$2
+
+    local LAST_BUILD_COMMIT_TIME=0
+    if [ -f "$FLAG_FILE" ]; then
+        LAST_BUILD_COMMIT_TIME=$(stat -c %Y "$FLAG_FILE")
+    fi
+
+    local HEAD_COMMIT_TIME
+    HEAD_COMMIT_TIME=$(git show -s --format=%ct HEAD)
+
+    [ "$HEAD_COMMIT_TIME" -ge "$LAST_BUILD_COMMIT_TIME" ]
+}
+
+set_build_needed_flag() {
+    local FLAG_FILE=$1
+    local HEAD_COMMIT_TIME
+    HEAD_COMMIT_TIME=$(git show -s --format=%ct HEAD)
+    touch -d "@$HEAD_COMMIT_TIME" "$FLAG_FILE"
+}

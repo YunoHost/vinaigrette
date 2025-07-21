@@ -1,0 +1,144 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+readonly THISSCRIPT=$0
+readonly SCRIPT_DIR=$(cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd)
+
+source "$SCRIPT_DIR/libvinaigrette/buildutils"
+source "$SCRIPT_DIR/libvinaigrette/chroots"
+source "$SCRIPT_DIR/libvinaigrette/config"
+source "$SCRIPT_DIR/libvinaigrette/debutils"
+source "$SCRIPT_DIR/libvinaigrette/gitutils"
+source "$SCRIPT_DIR/libvinaigrette/logging"
+source "$SCRIPT_DIR/libvinaigrette/scriptutils"
+
+# Set some path variables
+
+CONFIG_DIR="$SCRIPT_DIR/config"
+GIT_REPOS_DIR="$SCRIPT_DIR/data/git_repos"
+
+
+usage() {
+    cat << EOF
+Usage:
+    $THISSCRIPT <project> <branch> <version>
+
+Arguments:
+    <project>   $(array_print_sep ", " "${PROJECTS[@]}")
+    <branch>    testing or stable
+    <version>   x.y.z (ex: 2.6.1)
+EOF
+}
+
+setargs() {
+    if (( "$#" != "3" )); then
+        critical "Error: expecting 3 arguments."
+        return 1
+    fi
+    PROJECT=$1
+    BRANCH=$2
+    VERSION=$3
+
+    case "$VERSION" in
+        11.*) readonly DEBIAN_REL="bullseye" ;;
+        12.*) readonly DEBIAN_REL="bookworm" ;;
+        13.*) readonly DEBIAN_REL="trixie" ;;
+        *)  critical "Version should be 11.*, 12.* or 13.* !" ; return 1 ;;
+    esac
+
+    if ! array_contains_element "$PROJECT" "${PROJECTS[@]}" ; then
+        critical "Invalid project $PROJECT"
+        return 1
+    fi
+    if ! grep -q "^Codename: $DEBIAN_REL$" "$CONFIG_DIR/distributions"; then
+        critical "Invalid Debian release $DEBIAN_REL"
+        return 1
+    fi
+    if ! grep -q "^Components: .*$BRANCH.*$" "$CONFIG_DIR/distributions"; then
+        critical "Invalid branch $BRANCH"
+        return 1
+    fi
+    if [[ -z "$VERSION" ]]; then
+        critical "Invalid version $VERSION"
+        return 1
+    fi
+}
+
+validate_git_tag() {
+    local REPO=$1
+    local TAG=$2
+
+    if ! git_assert_tag_is_head "$REPO" "$TAG"; then
+        critical "Tag $TAG is not the HEAD of the branch :/"
+        return 1
+    fi
+    if [[ "$VERSION" != "$(debian_version "$REPO")" ]]; then
+        critical "Version $VERSION is not the last version in changelog"
+        return 1
+    fi
+}
+validate_branch() {
+    # check if the build branch type is coherent between what the user has specified and what is specified in the changelog
+    if ! [[ "$(head -n 1 debian/changelog)" == *"$BRANCH"* ]]; then
+       echo "The specified branch is not coherent with the changelog one!"
+       exit 1
+    fi
+}
+
+main() {
+    if ! setargs "$@"; then
+        usage
+        exit 1
+    fi
+
+    if [[ "$(tty)" == "not a tty" ]]; then
+        critical "You aint in a tty (are you in a 'lxc exec' ?) The script can't run because pbuilder won't be happy :|"
+    fi
+
+    boxed "Building $PROJECT $BRANCH release - $VERSION version"
+
+    local repo=$GIT_REPOS_DIR/$PROJECT
+    boxed "> Updating $repo repository..."
+    local TAG
+    TAG=$(echo "debian/$VERSION" | tr '~' '-')
+    local url="${PROJECT_URLS[$PROJECT]}"
+    git_fetch "$repo" "$url"
+    if ! git_tag_exists "$repo" "$TAG"; then
+        critical "Invalid version $VERSION (there's no tag $TAG in the git repo !)"
+    fi
+    git_checkout_tag "$repo" "$TAG"
+    validate_git_tag "$repo" "$TAG"
+    validate_branch
+
+    # Create temporary directory, delete it on exit
+    TMP_DIR="$(mktemp -d)"
+    trap 'rm -rf -- "$TMP_DIR"' EXIT
+
+    info "Exporting in ${TMP_DIR}..."
+    setup_tmpdir "$repo" "$TMP_DIR"
+
+    boxed "Building Debian package..."
+
+    ARCHS=$(debian_determinate_archs "$TMP_DIR/sources" "$REPOCONF_DIR" "$ARCHS")
+    for arch in $ARCHS; do
+        notify start "Starting build for $PACKAGE/$VERSION for $DEBIAN_REL/$BRANCH/${arch}..."
+        if ! build_package "$TMP_DIR" "$DEBIAN_REL" "nodebug" "$arch"; then
+            notify failure "Failed build for $PACKAGE/$VERSION for $DEBIAN_REL/$BRANCH/$arch ?!"
+            return 1
+        fi
+
+        arch_no_all=$arch
+        if [[ "$arch_no_all" == "all" ]]; then
+            arch_no_all="amd64"
+        fi
+
+        if ! distribute_package "$TMP_DIR" "$FIXME" "$DEBIAN_REL" "$PROJECT" "$VERSION" "$BRANCH" "$arch_no_all"; then
+            notify failure "Failed to include change of $PACKAGE/$VERSION for $DEBIAN_REL/$BRANCH/$arch ?!"
+            return 1
+        fi
+
+        notify success "Completed build for $PACKAGE/$VERSION for $DEBIAN_REL/$BRANCH/$arch."
+    done
+}
+
+main "$@"

@@ -1,0 +1,67 @@
+#!/usr/bin/env bash
+
+debian_changelog_set_daily_version() {
+    local PKGDIR=$1
+
+    local VERSION TIMETAG
+    VERSION=$(cd "$PKGDIR" || return 1; dpkg-parsechangelog -S Version 2>/dev/null)
+    TIMETAG="$(date +%Y%m%d%H%M)"
+
+    local VERSION_DAILY="${VERSION}+${TIMETAG}"
+
+    echo "> Setting version in changelog to $VERSION"
+
+    rm -f "$PKGDIR/debian/changelog.dch"
+    cp "$PKGDIR/debian/changelog" "$PKGDIR/debian/changelog.old"
+
+    pushd "$PKGDIR"
+        DEBEMAIL=contrib@yunohost.org \
+        dch --force-bad-version \
+            --newversion "$VERSION_DAILY" \
+            --force-distribution \
+            --distribution "unstable" \
+            "Daily build."
+    popd
+}
+
+debian_changelog_revert() {
+    local PKGDIR=$1
+    echo "> Restoring previous changelog"
+    mv "$PKGDIR/debian/changelog.old" "$PKGDIR/debian/changelog"
+}
+
+debian_source() {
+    local PKGDIR=$1
+    pushd "$PKGDIR"
+        dpkg-parsechangelog -S Source
+    popd
+}
+
+debian_version() {
+    local PKGDIR=$1
+    pushd "$PKGDIR"
+        dpkg-parsechangelog -S VERSION
+    popd
+}
+
+debian_determinate_archs() {
+    local PKGDIR=$1
+    local REPOCONF_DIR=$2
+    local ARCHS=$3
+
+    if [[ -n "$ARCHS" ]]; then
+        ARCHS="$(echo "$ARCHS" | tr ',' ' ')"
+    elif grep -q '^Architecture: all$' "$PKGDIR/debian/control"; then
+        ARCHS="all"
+    else
+        ARCHS="$(debian_repo_archs "$REPOCONF_DIR")"
+    fi
+    echo "$ARCHS"
+}
+
+debian_repo_archs() {
+    local REPOCONF_DIR=$1
+
+    grep "Architectures" "$REPOCONF_DIR/distributions" \
+        | head -n 1 | awk -F: '{print $2}' | sed 's/source//g'
+}

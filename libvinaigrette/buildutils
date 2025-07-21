@@ -1,0 +1,54 @@
+#!/usr/bin/env bash
+
+setup_tmpdir() {
+    local PKGDIR=$1
+    local TMP_DIR=$2
+
+    # Move files to a tmp folder
+    mkdir -p "$TMP_DIR/sources"
+
+    local TMP_ARCHIVE="$TMP_FOLDER/git_archive.tar.gz"
+    git -C "$PKGDIR" ls-files | xargs tar -C "$PKGDIR" -czf "$TMP_ARCHIVE"
+    tar xzf "$TMP_ARCHIVE" -C "$TMP_DIR/sources"
+    rm "$TMP_ARCHIVE"
+}
+
+build_package() {
+    local TMP_DIR=$1
+    local DEBIAN_CODENAME=$2
+    local DEBUG=$3
+    local ARCH=$4
+
+    local opts=(
+        --dist "$DEBIAN_CODENAME"
+        --no-run-lintian
+        --no-run-piuparts
+        --no-run-autopkgtest
+    )
+    if [[ "$DEBUG" == "debug" ]]; then
+        opts+=(--anything-failed-commands='%s')
+    fi
+    if [[ "$ARCH" != "all" ]]; then
+        opts=(--host "$ARCH")
+    fi
+
+    # Actual build is running here!
+    sbuild "${opts[@]}"
+}
+
+distribute_package() {
+    local TMP_DIR=$1
+    local REPO_DIR=$2
+    local DEBIAN_CODENAME=$3
+    local PACKAGE=$4
+    local VERSION=$5
+    local BRANCH=$6
+    local ARCH=$7
+
+    reprepro --waitforlock 6 \
+        --basedir "$REPO_DIR" \
+        --component "$BRANCH" \
+        include "$DEBIAN_CODENAME" \
+        "${ROOT_DIR}/${PACKAGE}_${VERSION}_${ARCH}.changes"
+
+}

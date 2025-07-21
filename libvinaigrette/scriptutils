@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+array_print_sep() {
+    local sep=$1
+    shift
+    local tmpvar
+    printf -v tmpvar '%s'"$sep" "$@"
+    printf '%s' "${tmpvar%"$sep"}"
+}
+
+
+array_contains_element () {
+    local e match="$1"
+    shift
+    for e; do
+        if [[ "$e" == "$match" ]]; then
+            return 0
+        fi
+    done
+    return 1
+}

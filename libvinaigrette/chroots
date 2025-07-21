@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+
+CHROOT_PREINSTALLS=(
+    aptitude
+    build-essential
+    ccache
+    cmake
+    debhelper
+    debhelper
+    devscripts
+    dh-python
+    eatmydata
+    git
+    libidn11-dev
+    liblua5.1-0-dev
+    libssl-dev
+    lua5.1
+    perl-openssl-defaults
+    python3-all
+    python3-jinja2
+    python3-psutil
+    python3-setuptools
+    python3-yaml
+    quilt
+    txt2man
+    wget
+)
+
+
+make_chroot() {
+    local DIST=$1
+
+    mkdir -p "$CHROOTS"
+
+    sbuild-createchroot --include="${CHROOT_PREINSTALLS[*]}" "$DIST" "$CHROOTS/$DIST-all"
+}

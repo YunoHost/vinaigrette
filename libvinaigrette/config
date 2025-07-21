@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+PROJECTS=(yunohost yunohost-admin yunohost-portal moulinette SSOwat)
+
+declare -A PROJECT_URLS=(
+    [yunohost]=https://github.com/yunohost/yunohost
+    [yunohost-admin]=https://github.com/yunohost/yunohost-admin
+    [yunohost-portal]=https://github.com/yunohost/yunohost-portal
+    [moulinette]=https://github.com/yunohost/moulinette
+    [SSOwat]=https://github.com/yunohost/SSOwat
+)
