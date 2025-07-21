@@ -21,10 +21,10 @@ GIT_REPOS_DIR="$SCRIPT_DIR/data/git_repos"
 usage() {
     cat << EOF
 Usage:
-    $THISSCRIPT <project> <branch> <version>
+    $THISSCRIPT <package> <branch> <version>
 
 Arguments:
-    <project>   $(array_print_sep ", " "${PROJECTS[@]}")
+    <package>   $(array_print_sep ", " "${PACKAGES[@]}")
     <branch>    testing or stable
     <version>   x.y.z (ex: 2.6.1)
 EOF
@@ -35,7 +35,7 @@ setargs() {
         critical "Error: expecting 3 arguments."
         return 1
     fi
-    PROJECT=$1
+    PACKAGE=$1
     BRANCH=$2
     VERSION=$3
 
@@ -46,8 +46,8 @@ setargs() {
         *)  critical "Version should be 11.*, 12.* or 13.* !" ; return 1 ;;
     esac
 
-    if ! array_contains_element "$PROJECT" "${PROJECTS[@]}" ; then
-        critical "Invalid project $PROJECT"
+    if ! array_contains_element "$PACKAGE" "${PACKAGES[@]}" ; then
+        critical "Invalid package $PACKAGE"
         return 1
     fi
     if ! grep -q "^Codename: $DEBIAN_REL$" "$CONFIG_DIR/distributions"; then
@@ -96,13 +96,13 @@ main() {
         critical "You aint in a tty (are you in a 'lxc exec' ?) The script can't run because pbuilder won't be happy :|"
     fi
 
-    boxed "Building $PROJECT $BRANCH release - $VERSION version"
+    boxed "Building $PACKAGE $BRANCH release - $VERSION version"
 
-    local repo=$GIT_REPOS_DIR/$PROJECT
+    local repo=$GIT_REPOS_DIR/$PACKAGE
     boxed "> Updating $repo repository..."
     local TAG
     TAG=$(echo "debian/$VERSION" | tr '~' '-')
-    local url="${PROJECT_URLS[$PROJECT]}"
+    local url="${PROJECT_URLS[$PACKAGE]}"
     git_fetch "$repo" "$url"
     if ! git_tag_exists "$repo" "$TAG"; then
         critical "Invalid version $VERSION (there's no tag $TAG in the git repo !)"
@@ -133,7 +133,7 @@ main() {
             arch_no_all="amd64"
         fi
 
-        if ! distribute_package "$TMP_DIR" "$FIXME" "$DEBIAN_REL" "$PROJECT" "$VERSION" "$BRANCH" "$arch_no_all"; then
+        if ! distribute_package "$TMP_DIR" "$FIXME" "$DEBIAN_REL" "$PACKAGE" "$VERSION" "$BRANCH" "$arch_no_all"; then
             notify failure "Failed to include change of $PACKAGE/$VERSION for $DEBIAN_REL/$BRANCH/$arch ?!"
             return 1
         fi
