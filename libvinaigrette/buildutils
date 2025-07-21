@@ -33,7 +33,9 @@ build_package() {
     fi
 
     # Actual build is running here!
-    sbuild "${opts[@]}"
+    pushd "$TMP_DIR" >/dev/null
+        sbuild "${opts[@]}"
+    popd >/dev/null
 }
 
 distribute_package() {
