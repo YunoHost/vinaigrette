@@ -78,8 +78,9 @@ validate_git_tag() {
     fi
 }
 validate_branch() {
+    local REPO=$1
     # check if the build branch type is coherent between what the user has specified and what is specified in the changelog
-    if ! [[ "$(head -n 1 debian/changelog)" == *"$BRANCH"* ]]; then
+    if ! [[ "$(head -n 1 "$REPO/debian/changelog")" == *"$BRANCH"* ]]; then
        echo "The specified branch is not coherent with the changelog one!"
        exit 1
     fi
@@ -108,7 +109,7 @@ main() {
     fi
     git_checkout_tag "$repo" "$TAG"
     validate_git_tag "$repo" "$TAG"
-    validate_branch
+    validate_branch "$repo"
 
     # Create temporary directory, delete it on exit
     TMP_DIR="$(mktemp -d)"
