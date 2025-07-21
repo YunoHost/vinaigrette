@@ -7,7 +7,7 @@ setup_tmpdir() {
     # Move files to a tmp folder
     mkdir -p "$TMP_DIR/sources"
 
-    local TMP_ARCHIVE="$TMP_FOLDER/git_archive.tar.gz"
+    local TMP_ARCHIVE="$TMP_DIR/git_archive.tar.gz"
     git -C "$PKGDIR" ls-files | xargs tar -C "$PKGDIR" -czf "$TMP_ARCHIVE"
     tar xzf "$TMP_ARCHIVE" -C "$TMP_DIR/sources"
     rm "$TMP_ARCHIVE"
