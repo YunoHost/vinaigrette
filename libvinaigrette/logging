@@ -20,7 +20,7 @@ success() {
 
 info() {
     local msg=${1}
-    echo "[${BOLD}${BLUE}INFO${NORMAL}] ${msg}"printf -v tmpvar '%s, ' "${PROJECTS[@]}"; printf '%s' "${tmpvar%, }"
+    echo "[${BOLD}${BLUE}INFO${NORMAL}] ${msg}"
 }
 
 boxed() {
