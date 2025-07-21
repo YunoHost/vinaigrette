@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-PROJECTS=(yunohost yunohost-admin yunohost-portal moulinette SSOwat)
+PACKAGES=(yunohost yunohost-admin yunohost-portal moulinette SSOwat)
 
 declare -A PROJECT_URLS=(
     [yunohost]=https://github.com/yunohost/yunohost
