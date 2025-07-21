@@ -33,7 +33,7 @@ build_package() {
     fi
 
     # Actual build is running here!
-    pushd "$TMP_DIR" >/dev/null
+    pushd "$TMP_DIR/sources" >/dev/null
         sbuild "${opts[@]}"
     popd >/dev/null
 }
