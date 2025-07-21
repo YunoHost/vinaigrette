@@ -120,7 +120,7 @@ main() {
 
     boxed "Building Debian package..."
 
-    ARCHS=$(debian_determinate_archs "$TMP_DIR/sources" "$CONFIG_DIR" "$ARCHS")
+    ARCHS=$(debian_determinate_archs "$TMP_DIR/sources" "$CONFIG_DIR" "${ARCHS:-}")
     for arch in $ARCHS; do
         notify start "Starting build for $PACKAGE/$VERSION for $DEBIAN_REL/$BRANCH/${arch}..."
         if ! build_package "$TMP_DIR" "$DEBIAN_REL" "nodebug" "$arch"; then
