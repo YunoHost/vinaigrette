@@ -17,6 +17,7 @@ source "$SCRIPT_DIR/libvinaigrette/scriptutils"
 CONFIG_DIR="$SCRIPT_DIR/config"
 DATA_DIR="$SCRIPT_DIR/data"
 GIT_REPOS_DIR="$DATA_DIR/git_repos"
+CHROOTS_DIR="$DATA_DIR/chroots"
 
 
 usage() {
@@ -97,6 +98,12 @@ main() {
         critical "You aint in a tty (are you in a 'lxc exec' ?) The script can't run because pbuilder won't be happy :|"
     fi
 
+    local chroot_dir="$CHROOTS_DIR/$DEBIAN_REL-all"
+    if [ ! -d "$chroot_dir" ]; then
+        info "Creating chroot for Debian ${DEBIAN_REL}..."
+        make_chroot "$DEBIAN_REL" "$chroot_dir"
+    fi
+
     boxed "Building $PACKAGE $BRANCH release - $VERSION version"
 
     local repo=$GIT_REPOS_DIR/$PACKAGE
@@ -122,7 +129,7 @@ main() {
 
     boxed "Building Debian package..."
 
-    build_package_all_archs "$tmp_dir" "$DEBIAN_REL" "$PACKAGE" "$VERSION" "$BRANCH"
+    build_package_all_archs "$tmp_dir" "$DEBIAN_REL" "$PACKAGE" "$VERSION" "$BRANCH" "$chroot_dir"
 
     distribute_package_all_archs "$tmp_dir" "$DEBIAN_REL" "$PACKAGE" "$VERSION" "$BRANCH"
 
@@ -141,6 +148,12 @@ main_unstable() {
     local package debian_codename
     for package in "${PACKAGES[@]}"; do
         for debian_codename in "${DEBIAN_VERSIONS[@]}"; do
+            local chroot_dir="$CHROOTS_DIR/$DEBIAN_REL-all"
+            if [ ! -d "$chroot_dir" ]; then
+                info "Creating chroot for Debian ${DEBIAN_REL}..."
+                make_chroot "$DEBIAN_REL" "$chroot_dir"
+            fi
+
             echo "-------------------------------------"
             echo "Looking for update in ${package} for ${debian_codename}..."
 

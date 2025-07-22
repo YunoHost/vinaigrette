@@ -29,8 +29,9 @@ CHROOT_PREINSTALLS=(
 
 make_chroot() {
     local dist=$1
+    local chroot_dir=$2
 
-    mkdir -p "$CHROOTS"
+    mkdir -p "$(dirname "$chroot_dir")"
 
-    sbuild-createchroot --include="${CHROOT_PREINSTALLS[*]}" "$dist" "$CHROOTS/$dist-all"
+    sbuild-createchroot --include="${CHROOT_PREINSTALLS[*]}" "$dist" "$chroot_dir"
 }

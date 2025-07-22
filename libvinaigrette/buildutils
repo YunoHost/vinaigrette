@@ -18,9 +18,11 @@ build_package() {
     local debian_codename=$2
     local debug=$3
     local arch=$4
+    local chroot_dir=$5
 
     local opts=(
         --dist "$debian_codename"
+        --chroot "$chroot_dir"
         --no-run-lintian
         --no-run-piuparts
         --no-run-autopkgtest
@@ -61,6 +63,7 @@ build_package_all_archs() {
     local package=$3
     local version=$4
     local branch=$5
+    local chroot_dir=$6
 
     local archs
     archs=$(debian_determinate_archs "$tmp_dir/sources" "$CONFIG_DIR" "${archs:-}")
@@ -68,7 +71,7 @@ build_package_all_archs() {
     ARCHS_DONE=()
     for arch in $archs; do
         notify start "Starting build for $package/$version for $debian_codename/$branch/${arch}..."
-        if ! build_package "$tmp_dir" "$debian_codename" "nodebug" "$arch"; then
+        if ! build_package "$tmp_dir" "$debian_codename" "nodebug" "$arch" "$chroot_dir"; then
             notify failure "Failed build for $package/$version for $debian_codename/$branch/$arch ?!"
             return 1
         fi
