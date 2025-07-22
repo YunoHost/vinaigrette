@@ -9,7 +9,7 @@ array_print_sep() {
 }
 
 
-array_contains_element () {
+array_contains_element() {
     local e match="$1"
     shift
     for e; do
@@ -18,4 +18,10 @@ array_contains_element () {
         fi
     done
     return 1
+}
+
+is_already_running() {
+    local scriptname
+    scriptname=$(basename "$0")
+    pidof -x "$scriptname" -o "%PPID" >/dev/null
 }

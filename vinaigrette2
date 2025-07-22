@@ -133,6 +133,11 @@ main() {
 main_unstable() {
     local force=false
 
+    if is_already_running; then
+        echo "$0 is already running!"
+        exit 0
+    fi
+
     local package debian_codename
     for package in "${PACKAGES[@]}"; do
         for debian_codename in "${DEBIAN_VERSIONS[@]}"; do
