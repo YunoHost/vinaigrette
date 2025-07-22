@@ -31,7 +31,7 @@ CHROOT_SUFFIX="-sbuild-vinaigrette2"
 
 get_chroot_name() {
     local dist=$1
-    echo "$dist-$CHROOT_SUFFIX"
+    echo "$dist$CHROOT_SUFFIX"
 }
 
 make_chroot() {
