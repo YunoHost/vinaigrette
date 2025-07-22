@@ -1,67 +1,67 @@
 #!/usr/bin/env bash
 
 debian_changelog_set_daily_version() {
-    local PKGDIR=$1
+    local pkgdir=$1
 
-    local VERSION TIMETAG
-    VERSION=$(cd "$PKGDIR" || return 1; dpkg-parsechangelog -S Version 2>/dev/null)
-    TIMETAG="$(date +%Y%m%d%H%M)"
+    local version timetag
+    version=$(cd "$pkgdir" || return 1; dpkg-parsechangelog -S Version 2>/dev/null)
+    timetag="$(date +%Y%m%d%H%M)"
 
-    local VERSION_DAILY="${VERSION}+${TIMETAG}"
+    local version_daily="${version}+${timetag}"
 
-    echo "> Setting version in changelog to $VERSION"
+    echo "> Setting version in changelog to $version"
 
-    rm -f "$PKGDIR/debian/changelog.dch"
-    cp "$PKGDIR/debian/changelog" "$PKGDIR/debian/changelog.old"
+    rm -f "$pkgdir/debian/changelog.dch"
+    cp "$pkgdir/debian/changelog" "$pkgdir/debian/changelog.old"
 
-    pushd "$PKGDIR" >/dev/null
+    pushd "$pkgdir" >/dev/null || exit 1
         DEBEMAIL=contrib@yunohost.org \
         dch --force-bad-version \
-            --newversion "$VERSION_DAILY" \
+            --newversion "$version_daily" \
             --force-distribution \
             --distribution "unstable" \
             "Daily build."
-    popd >/dev/null
+    popd >/dev/null || exit 1
 }
 
 debian_changelog_revert() {
-    local PKGDIR=$1
+    local pkgdir=$1
     echo "> Restoring previous changelog"
-    mv "$PKGDIR/debian/changelog.old" "$PKGDIR/debian/changelog"
+    mv "$pkgdir/debian/changelog.old" "$pkgdir/debian/changelog"
 }
 
 debian_source() {
-    local PKGDIR=$1
-    pushd "$PKGDIR" >/dev/null
+    local pkgdir=$1
+    pushd "$pkgdir" >/dev/null || exit 1
         dpkg-parsechangelog -S Source
-    popd >/dev/null
+    popd >/dev/null || exit 1
 }
 
 debian_version() {
-    local PKGDIR=$1
-    pushd "$PKGDIR" >/dev/null
+    local pkgdir=$1
+    pushd "$pkgdir" >/dev/null || exit 1
         dpkg-parsechangelog -S VERSION
-    popd >/dev/null
+    popd >/dev/null || exit 1
 }
 
 debian_determinate_archs() {
-    local PKGDIR=$1
-    local REPOCONF_DIR=$2
-    local ARCHS=$3
+    local pkgdir=$1
+    local repoconf_dir=$2
+    local archs=$3
 
-    if [[ -n "$ARCHS" ]]; then
-        ARCHS="$(echo "$ARCHS" | tr ',' ' ')"
-    elif grep -q '^Architecture: all$' "$PKGDIR/debian/control"; then
-        ARCHS="all"
+    if [[ -n "$archs" ]]; then
+        archs="$(echo "$archs" | tr ',' ' ')"
+    elif grep -q '^Architecture: all$' "$pkgdir/debian/control"; then
+        archs="all"
     else
-        ARCHS="$(debian_repo_archs "$REPOCONF_DIR")"
+        archs="$(debian_repo_archs "$repoconf_dir")"
     fi
-    echo "$ARCHS"
+    echo "$archs"
 }
 
 debian_repo_archs() {
-    local REPOCONF_DIR=$1
+    local repoconf_dir=$1
 
-    grep "Architectures" "$REPOCONF_DIR/distributions" \
+    grep "Architectures" "$repoconf_dir/distributions" \
         | head -n 1 | awk -F: '{print $2}' | sed 's/source//g'
 }

@@ -14,43 +14,43 @@ readonly YELLOW=$(printf '\033[93m')
 readonly WHITE=$(printf '\033[39m')
 
 success() {
-    local msg=${1}
+    local msg=$1
     echo "[${BOLD}${GREEN} OK ${NORMAL}] ${msg}"
 }
 
 info() {
-    local msg=${1}
+    local msg=$1
     echo "[${BOLD}${BLUE}INFO${NORMAL}] ${msg}"
 }
 
 boxed() {
-    local msg=${1}
+    local msg=$1
     echo "$msg" | boxes -d stone
 }
 
 warn() {
-    local msg=${1}
+    local msg=$1
     echo "[${BOLD}${ORANGE}WARN${NORMAL}] ${msg}" 2>&1
 }
 
 error() {
-    local msg=${1}
+    local msg=$1
     echo "[${BOLD}${RED}FAIL${NORMAL}] ${msg}" 2>&1
 }
 
 critical() {
-    local msg=${1}
+    local msg=$1
     echo "[${BOLD}${RED}CRIT${NORMAL}] ${msg}" 2>&1
     return 1
 }
 
 notify() {
-    local STATUS=$1
-    local MSG=$2
+    local status=$1
+    local msg=$2
 
-    case "$STATUS" in
-	start)      sendxmppy "🏗️  $MSG" ;;
-	success)    sendxmppy "✔️  $MSG" ;;
-	failure)    sendxmppy "❌ $MSG" ;;
+    case "$status" in
+	start)      sendxmppy "🏗️  $msg" ;;
+	success)    sendxmppy "✔️  $msg" ;;
+	failure)    sendxmppy "❌ $msg" ;;
 	esac
 }

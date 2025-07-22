@@ -2,66 +2,66 @@
 
 # Fetch remote changes for a gitrepo
 git_fetch() {
-    local REPODIR=$1
-    local PROJECT_URL=$2
+    local repodir=$1
+    local project_url=$2
 
-    if [ -d "$REPODIR/.git" ]; then
-        git -C "$REPODIR" fetch --quiet
-        git -C "$REPODIR" fetch --tags --quiet --force
+    if [ -d "$repodir/.git" ]; then
+        git -C "$repodir" fetch --quiet
+        git -C "$repodir" fetch --tags --quiet --force
     else
-        mkdir -p "$(dirname "$REPODIR")"
-        git clone "$PROJECT_URL" "$REPODIR"
+        mkdir -p "$(dirname "$repodir")"
+        git clone "$project_url" "$repodir"
     fi
 }
 
 git_tag_exists() {
-    local REPODIR=$1
-    local TAG=$2
+    local repodir=$1
+    local tag=$2
 
-    git -C "$REPODIR" rev-parse "$TAG" --quiet >/dev/null 2>&1
+    git -C "$repodir" rev-parse "$tag" --quiet >/dev/null 2>&1
 }
 
 # Checkout TAG on REPO
 git_checkout_tag() {
-    local REPODIR=$1
-    local TAG=$2
+    local repodir=$1
+    local tag=$2
 
-    git -C "$REPODIR" checkout "$TAG" --quiet
-    git -C "$REPODIR" reset --hard "$TAG" --quiet
+    git -C "$repodir" checkout "$tag" --quiet
+    git -C "$repodir" reset --hard "$tag" --quiet
 }
 
 git_checkout_branch() {
-    local REPODIR=$1
-    local BRANCH=$2
-    git -C "$REPODIR" checkout "$BRANCH" --quiet
-    git -C "$REPODIR" reset --hard "origin/$BRANCH" --quiet
+    local repodir=$1
+    local branch=$2
+    git -C "$repodir" checkout "$branch" --quiet
+    git -C "$repodir" reset --hard "origin/$branch" --quiet
 }
 
 git_assert_tag_is_head() {
-    local REPODIR=$1
-    local TAG=$2
+    local repodir=$1
+    local tag=$2
 
-    [ "$(git -C "$REPODIR" rev-parse "$TAG")" == "$(git -C "$REPODIR" rev-parse "HEAD")" ]
+    [ "$(git -C "$repodir" rev-parse "$tag")" == "$(git -C "$repodir" rev-parse "HEAD")" ]
 }
 
 check_build_needed() {
-    local FLAG_FILE=$1
-    local REPODIR=$2
+    local repodir=$1
+    local flag_file=$2
 
-    local LAST_BUILD_COMMIT_TIME=0
-    if [ -f "$FLAG_FILE" ]; then
-        LAST_BUILD_COMMIT_TIME=$(stat -c %Y "$FLAG_FILE")
+    local last_build_commit_time=0
+    if [ -f "$flag_file" ]; then
+        last_build_commit_time=$(stat -c %Y "$flag_file")
     fi
 
-    local HEAD_COMMIT_TIME
-    HEAD_COMMIT_TIME=$(git show -s --format=%ct HEAD)
+    local head_commit_time
+    head_commit_time=$(git -C "$repodir" show -s --format=%ct HEAD)
 
-    [ "$HEAD_COMMIT_TIME" -ge "$LAST_BUILD_COMMIT_TIME" ]
+    [ "$head_commit_time" -ge "$last_build_commit_time" ]
 }
 
 set_build_needed_flag() {
-    local FLAG_FILE=$1
-    local HEAD_COMMIT_TIME
-    HEAD_COMMIT_TIME=$(git show -s --format=%ct HEAD)
-    touch -d "@$HEAD_COMMIT_TIME" "$FLAG_FILE"
+    local flag_file=$1
+    local head_commit_time
+    head_commit_time=$(git show -s --format=%ct HEAD)
+    touch -d "@$head_commit_time" "$flag_file"
 }

@@ -65,22 +65,22 @@ setargs() {
 }
 
 validate_git_tag() {
-    local REPO=$1
-    local TAG=$2
+    local repo=$1
+    local tag=$2
 
-    if ! git_assert_tag_is_head "$REPO" "$TAG"; then
-        critical "Tag $TAG is not the HEAD of the branch :/"
+    if ! git_assert_tag_is_head "$repo" "$tag"; then
+        critical "Tag $tag is not the HEAD of the branch :/"
         return 1
     fi
-    if [[ "$VERSION" != "$(debian_version "$REPO")" ]]; then
+    if [[ "$VERSION" != "$(debian_version "$repo")" ]]; then
         critical "Version $VERSION is not the last version in changelog"
         return 1
     fi
 }
 validate_branch() {
-    local REPO=$1
+    local repo=$1
     # check if the build branch type is coherent between what the user has specified and what is specified in the changelog
-    if ! [[ "$(head -n 1 "$REPO/debian/changelog")" == *"$BRANCH"* ]]; then
+    if ! [[ "$(head -n 1 "$repo/debian/changelog")" == *"$BRANCH"* ]]; then
        echo "The specified branch is not coherent with the changelog one!"
        exit 1
     fi
@@ -100,15 +100,15 @@ main() {
 
     local repo=$GIT_REPOS_DIR/$PACKAGE
     boxed "> Updating $repo repository..."
-    local TAG
-    TAG=$(echo "debian/$VERSION" | tr '~' '-')
+    local tag
+    tag=$(echo "debian/$VERSION" | tr '~' '-')
     local url="${PROJECT_URLS[$PACKAGE]}"
     git_fetch "$repo" "$url"
-    if ! git_tag_exists "$repo" "$TAG"; then
-        critical "Invalid version $VERSION (there's no tag $TAG in the git repo !)"
+    if ! git_tag_exists "$repo" "$tag"; then
+        critical "Invalid version $VERSION (there's no tag $tag in the git repo !)"
     fi
-    git_checkout_tag "$repo" "$TAG"
-    validate_git_tag "$repo" "$TAG"
+    git_checkout_tag "$repo" "$tag"
+    validate_git_tag "$repo" "$tag"
     validate_branch "$repo"
 
     # Create temporary directory, delete it on exit

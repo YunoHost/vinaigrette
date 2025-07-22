@@ -1,56 +1,56 @@
 #!/usr/bin/env bash
 
 setup_tmpdir() {
-    local PKGDIR=$1
-    local TMP_DIR=$2
+    local pkgdir=$1
+    local tmp_dir=$2
 
     # Move files to a tmp folder
-    mkdir -p "$TMP_DIR/sources"
+    mkdir -p "$tmp_dir/sources"
 
-    local TMP_ARCHIVE="$TMP_DIR/git_archive.tar.gz"
-    git -C "$PKGDIR" ls-files | xargs tar -C "$PKGDIR" -czf "$TMP_ARCHIVE"
-    tar xzf "$TMP_ARCHIVE" -C "$TMP_DIR/sources"
-    rm "$TMP_ARCHIVE"
+    local tmp_archive="$tmp_dir/git_archive.tar.gz"
+    git -C "$pkgdir" ls-files | xargs tar -C "$pkgdir" -czf "$tmp_archive"
+    tar xzf "$tmp_archive" -C "$tmp_dir/sources"
+    rm "$tmp_archive"
 }
 
 build_package() {
-    local TMP_DIR=$1
-    local DEBIAN_CODENAME=$2
-    local DEBUG=$3
-    local ARCH=$4
+    local tmp_dir=$1
+    local debian_codename=$2
+    local debug=$3
+    local arch=$4
 
     local opts=(
-        --dist "$DEBIAN_CODENAME"
+        --dist "$debian_codename"
         --no-run-lintian
         --no-run-piuparts
         --no-run-autopkgtest
     )
-    if [[ "$DEBUG" == "debug" ]]; then
+    if [[ "$debug" == "debug" ]]; then
         opts+=(--anything-failed-commands='%s')
     fi
-    if [[ "$ARCH" != "all" ]]; then
-        opts=(--host "$ARCH")
+    if [[ "$arch" != "all" ]]; then
+        opts=(--host "$arch")
     fi
 
     # Actual build is running here!
-    pushd "$TMP_DIR/sources" >/dev/null
+    pushd "$tmp_dir/sources" >/dev/null || exit 1
         sbuild "${opts[@]}"
-    popd >/dev/null
+    popd >/dev/null || exit 1
 }
 
 distribute_package() {
-    local TMP_DIR=$1
-    local REPO_DIR=$2
-    local DEBIAN_CODENAME=$3
-    local PACKAGE=$4
-    local VERSION=$5
-    local BRANCH=$6
-    local ARCH=$7
+    local tmp_dir=$1
+    local repo_dir=$2
+    local debian_codename=$3
+    local package=$4
+    local version=$5
+    local branch=$6
+    local arch=$7
 
     reprepro --waitforlock 6 \
-        --basedir "$REPO_DIR" \
-        --component "$BRANCH" \
-        include "$DEBIAN_CODENAME" \
-        "${ROOT_DIR}/${PACKAGE}_${VERSION}_${ARCH}.changes"
+        --basedir "$repo_dir" \
+        --component "$branch" \
+        include "$debian_codename" \
+        "$root_dir/${package}_${version}_${arch}.changes"
 
 }
