@@ -18,6 +18,7 @@ CONFIG_DIR="$SCRIPT_DIR/config"
 DATA_DIR="$SCRIPT_DIR/data"
 GIT_REPOS_DIR="$DATA_DIR/git_repos"
 CHROOTS_DIR="$DATA_DIR/chroots"
+BUILDS_DIR="$DATA_DIR/builds"
 
 
 usage() {
@@ -117,7 +118,8 @@ main() {
 
     # Create temporary directory, delete it on exit
     local tmp_dir
-    tmp_dir="$(mktemp -d)"
+    mkdir -p "$BUILDS_DIR"
+    tmp_dir="$(mktemp -d -p "$BUILDS_DIR/" --suffix="-$PACKAGE-$BRANCH-$VERSION")"
     trap 'rm -rf -- "'"$tmp_dir"'"' EXIT
 
     info "Exporting in ${tmp_dir}..."
@@ -172,6 +174,15 @@ main_unstable() {
 
             debian_changelog_set_daily_version "$repo" "$version"
 
+            # Create temporary directory, delete it on exit
+            local tmp_dir
+            mkdir -p "$BUILDS_DIR"
+            tmp_dir="$(mktemp -d -p "$BUILDS_DIR/" --suffix="-$package-unstable-$version")"
+            trap 'rm -rf -- "'"$tmp_dir"'"' EXIT
+
+            info "Exporting in ${tmp_dir}..."
+            setup_tmpdir "$repo" "$tmp_dir"
+
             build_package_all_archs "$tmp_dir" "$debian_codename" "$package" "$version" "unstable"
 
             distribute_package_all_archs "$tmp_dir" "$debian_codename" "$package" "$version" "unstable"
@@ -179,6 +190,8 @@ main_unstable() {
             debian_changelog_revert "$repo"
             set_build_needed_timestamp "$repo" "$flag_file"
 
+            rm -r "$tmp_dir"
+            trap '' EXIT
         done
     done
     info "-------------------------------------"
