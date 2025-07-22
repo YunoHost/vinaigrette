@@ -14,12 +14,12 @@ source "$SCRIPT_DIR/libvinaigrette/scriptutils"
 
 # Set some path variables
 
-CONFIG_DIR="$SCRIPT_DIR/config"
-DATA_DIR="$SCRIPT_DIR/data"
-GIT_REPOS_DIR="$DATA_DIR/git_repos"
-CHROOTS_DIR="$DATA_DIR/chroots"
-BUILDS_DIR="$DATA_DIR/builds"
-
+readonly CONFIG_DIR="$SCRIPT_DIR/config"
+readonly DATA_DIR="$SCRIPT_DIR/data"
+readonly GIT_REPOS_DIR="$DATA_DIR/git_repos"
+readonly CHROOTS_DIR="$DATA_DIR/chroots"
+readonly BUILDS_DIR="$DATA_DIR/builds"
+readonly REPO_DIR="$DATA_DIR/repo"
 
 usage() {
     cat << EOF
@@ -129,7 +129,7 @@ main() {
 
     build_package_all_archs "$tmp_dir" "$DEBIAN_REL" "$PACKAGE" "$VERSION" "$BRANCH"
 
-    distribute_package_all_archs "$tmp_dir" "$DEBIAN_REL" "$PACKAGE" "$VERSION" "$BRANCH"
+    distribute_package_all_archs "$REPO_DIR" "$tmp_dir" "$DEBIAN_REL" "$PACKAGE" "$VERSION" "$BRANCH"
 
     rm -r "$tmp_dir"
     trap '' EXIT
@@ -142,6 +142,12 @@ main_unstable() {
         error "$0 is already running!"
         exit 0
     fi
+
+    # Create temporary directory, delete it on exit
+    local tmp_main_dir
+    mkdir -p "$BUILDS_DIR"
+    tmp_main_dir="$(mktemp -d -p "$BUILDS_DIR/" --suffix="-unstable")"
+    trap 'rm -rf -- "'"$tmp_main_dir"'"' EXIT
 
     local package debian_codename
     for package in "${PACKAGES[@]}"; do
@@ -174,27 +180,23 @@ main_unstable() {
 
             debian_changelog_set_daily_version "$repo" "$version"
 
-            # Create temporary directory, delete it on exit
-            local tmp_dir
-            mkdir -p "$BUILDS_DIR"
-            tmp_dir="$(mktemp -d -p "$BUILDS_DIR/" --suffix="-$package-unstable-$version")"
-            trap 'rm -rf -- "'"$tmp_dir"'"' EXIT
-
+            tmp_dir="$tmp_main_dir/$package-$debian_codename"
             info "Exporting in ${tmp_dir}..."
             setup_tmpdir "$repo" "$tmp_dir"
 
             build_package_all_archs "$tmp_dir" "$debian_codename" "$package" "$version" "unstable"
 
-            distribute_package_all_archs "$tmp_dir" "$debian_codename" "$package" "$version" "unstable"
+            distribute_package_all_archs "$REPO_DIR" "$tmp_dir" "$debian_codename" "$package" "$version" "unstable"
 
             debian_changelog_revert "$repo"
             set_build_needed_timestamp "$repo" "$flag_file"
 
-            rm -r "$tmp_dir"
-            trap '' EXIT
         done
     done
     info "-------------------------------------"
+
+    rm -r "$tmp_main_dir"
+    trap '' EXIT
     cleanup_pidfile
 }
 
