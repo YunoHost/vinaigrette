@@ -35,9 +35,9 @@ build_package() {
     fi
 
     # Actual build is running here!
-    pushd "$tmp_dir/sources" >/dev/null || exit 1
-        sbuild "${opts[@]}"
-    popd >/dev/null || exit 1
+    pushd "$tmp_dir/sources" >/dev/null || return 1
+        sbuild "${opts[@]}" || return 1
+    popd >/dev/null || return 1
 }
 
 distribute_package() {
@@ -94,7 +94,7 @@ distribute_package_all_archs() {
             arch_no_all="amd64"
         fi
 
-        if ! distribute_package "$tmp_dir" "$FIXME" "$debian_codename" "$package" "$version" "$branch" "$arch_no_all"; then
+        if ! distribute_package "$tmp_dir" "$fixme" "$debian_codename" "$package" "$version" "$branch" "$arch_no_all"; then
             notify failure "Failed to include change of $package/$version for $debian_codename/$branch/$arch ?!"
             return 1
         fi

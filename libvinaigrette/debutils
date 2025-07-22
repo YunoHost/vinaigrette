@@ -18,14 +18,14 @@ debian_changelog_set_daily_version() {
     rm -f "$pkgdir/debian/changelog.dch"
     cp "$pkgdir/debian/changelog" "$pkgdir/debian/changelog.old"
 
-    pushd "$pkgdir" >/dev/null || exit 1
+    pushd "$pkgdir" >/dev/null || return 1
         DEBEMAIL=contrib@yunohost.org \
         dch --force-bad-version \
             --newversion "$version_daily" \
             --force-distribution \
             --distribution "unstable" \
             "Daily build."
-    popd >/dev/null || exit 1
+    popd >/dev/null || return 1
 }
 
 debian_changelog_revert() {
@@ -36,16 +36,16 @@ debian_changelog_revert() {
 
 debian_source() {
     local pkgdir=$1
-    pushd "$pkgdir" >/dev/null || exit 1
+    pushd "$pkgdir" >/dev/null || return 1
         dpkg-parsechangelog -S Source
-    popd >/dev/null || exit 1
+    popd >/dev/null || return 1
 }
 
 debian_version() {
     local pkgdir=$1
-    pushd "$pkgdir" >/dev/null || exit 1
+    pushd "$pkgdir" >/dev/null || return 1
         dpkg-parsechangelog -S VERSION
-    popd >/dev/null || exit 1
+    popd >/dev/null || return 1
 }
 
 debian_determinate_archs() {
