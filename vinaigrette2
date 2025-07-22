@@ -98,7 +98,7 @@ main() {
         critical "You aint in a tty (are you in a 'lxc exec' ?) The script can't run because pbuilder won't be happy :|"
     fi
 
-    make_chroot
+    make_chroot "$DEBIAN_REL"
     local chroot_name
     chroot_name=$(get_chroot_name "$DEBIAN_REL")
 
@@ -147,9 +147,9 @@ main_unstable() {
     for package in "${PACKAGES[@]}"; do
         for debian_codename in "${DEBIAN_VERSIONS[@]}"; do
 
-            make_chroot
+            make_chroot "$debian_codename"
             local chroot_name
-            chroot_name=$(get_chroot_name "$DEBIAN_REL")
+            chroot_name=$(get_chroot_name "$debian_codename")
 
             info "-------------------------------------"
             info "Looking for update in ${package} for ${debian_codename}..."
