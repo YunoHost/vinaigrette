@@ -16,7 +16,7 @@ declare -A DEBIAN_VERSIONS=(
     [13]="trixie"
 )
 
-declare -A PROJECT_BRANCHES=(
+declare -A UNSTABLE_PROJECT_BRANCHES=(
     [bookworm]="dev"
     [trixie]="trixie"
 )

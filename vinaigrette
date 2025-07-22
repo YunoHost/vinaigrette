@@ -151,8 +151,7 @@ main_unstable() {
 
     local package debian_codename
     for package in "${PACKAGES[@]}"; do
-        for debian_codename in "${DEBIAN_VERSIONS[@]}"; do
-
+        for debian_codename in "${!UNSTABLE_PROJECT_BRANCHES[@]}"; do
             make_chroot "$debian_codename"
 
             info "-------------------------------------"
@@ -162,7 +161,7 @@ main_unstable() {
             local url="${PROJECT_URLS[$package]}"
             git_fetch "$repo" "$url"
 
-            local gitbranch="${PROJECT_BRANCHES[$debian_codename]}"
+            local gitbranch="${UNSTABLE_PROJECT_BRANCHES[$debian_codename]}"
             git_checkout_branch "$repo" "$gitbranch"
 
             local flag_file="$DATA_DIR/${debian_codename}_${package}.timestamp"
