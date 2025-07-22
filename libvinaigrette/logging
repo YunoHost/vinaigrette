@@ -49,8 +49,8 @@ notify() {
     local msg=$2
 
     case "$status" in
-	start)      sendxmppy "🏗️  $msg" ;;
-	success)    sendxmppy "✔️  $msg" ;;
-	failure)    sendxmppy "❌ $msg" ;;
+	start)      sendxmpppy "🏗️  $msg" ;;
+	success)    sendxmpppy "✔️  $msg" ;;
+	failure)    sendxmpppy "❌ $msg" ;;
 	esac
 }
