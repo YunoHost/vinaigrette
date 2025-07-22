@@ -54,3 +54,47 @@ distribute_package() {
         "$root_dir/${package}_${version}_${arch}.changes"
 
 }
+
+build_package_all_archs() {
+    local tmp_dir=$1
+    local debian_codename=$2
+    local package=$3
+    local version=$4
+    local branch=$5
+
+    local archs
+    archs=$(debian_determinate_archs "$tmp_dir/sources" "$CONFIG_DIR" "${archs:-}")
+    # return value
+    ARCHS_DONE=()
+    for arch in $archs; do
+        notify start "Starting build for $package/$version for $debian_codename/$branch/${arch}..."
+        if ! build_package "$tmp_dir" "$debian_codename" "nodebug" "$arch"; then
+            notify failure "Failed build for $package/$version for $debian_codename/$branch/$arch ?!"
+            return 1
+        fi
+        ARCHS_DONE+=("$arch")
+        notify success "Completed build for $package/$version for $debian_codename/$branch/$arch."
+    done
+}
+
+
+distribute_package_all_archs() {
+    local tmp_dir=$1
+    local debian_codename=$2
+    local package=$3
+    local version=$4
+    local branch=$5
+
+    for arch in "${ARCHS_DONE[@]}"; do
+        local arch_no_all=$arch
+        if [[ "$arch_no_all" == "all" ]]; then
+            arch_no_all="amd64"
+        fi
+
+        if ! distribute_package "$tmp_dir" "$FIXME" "$debian_codename" "$package" "$version" "$branch" "$arch_no_all"; then
+            notify failure "Failed to include change of $package/$version for $debian_codename/$branch/$arch ?!"
+            return 1
+        fi
+    done
+    notify success "Completed distribution for $package/$version for $debian_codename/${branch}."
+}

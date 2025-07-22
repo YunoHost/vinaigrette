@@ -1,13 +1,17 @@
 #!/usr/bin/env bash
 
-debian_changelog_set_daily_version() {
+debian_get_daily_version() {
     local pkgdir=$1
-
     local version timetag
     version=$(cd "$pkgdir" || return 1; dpkg-parsechangelog -S Version 2>/dev/null)
     timetag="$(date +%Y%m%d%H%M)"
 
-    local version_daily="${version}+${timetag}"
+    echo "${version}+${timetag}"
+}
+
+debian_changelog_set_daily_version() {
+    local pkgdir=$1
+    local version_daily=$2
 
     echo "> Setting version in changelog to $version"
 

@@ -15,7 +15,8 @@ source "$SCRIPT_DIR/libvinaigrette/scriptutils"
 # Set some path variables
 
 CONFIG_DIR="$SCRIPT_DIR/config"
-GIT_REPOS_DIR="$SCRIPT_DIR/data/git_repos"
+DATA_DIR="$SCRIPT_DIR/data"
+GIT_REPOS_DIR="$DATA_DIR/git_repos"
 
 
 usage() {
@@ -112,38 +113,64 @@ main() {
     validate_branch "$repo"
 
     # Create temporary directory, delete it on exit
-    TMP_DIR="$(mktemp -d)"
-    trap 'rm -rf -- "$TMP_DIR"' EXIT
+    local tmp_dir
+    tmp_dir="$(mktemp -d)"
+    trap 'rm -rf -- "'"$tmp_dir"'"' EXIT
 
-    info "Exporting in ${TMP_DIR}..."
-    setup_tmpdir "$repo" "$TMP_DIR"
+    info "Exporting in ${tmp_dir}..."
+    setup_tmpdir "$repo" "$tmp_dir"
 
     boxed "Building Debian package..."
 
-    ARCHS=$(debian_determinate_archs "$TMP_DIR/sources" "$CONFIG_DIR" "${ARCHS:-}")
-    ARCHS_DONE=()
-    for arch in $ARCHS; do
-        notify start "Starting build for $PACKAGE/$VERSION for $DEBIAN_REL/$BRANCH/${arch}..."
-        if ! build_package "$TMP_DIR" "$DEBIAN_REL" "nodebug" "$arch"; then
-            notify failure "Failed build for $PACKAGE/$VERSION for $DEBIAN_REL/$BRANCH/$arch ?!"
-            return 1
-        fi
-        ARCHS_DONE+=("$arch")
+    build_package_all_archs "$tmp_dir" "$DEBIAN_REL" "$PACKAGE" "$VERSION" "$BRANCH"
+
+    distribute_package_all_archs "$tmp_dir" "$DEBIAN_REL" "$PACKAGE" "$VERSION" "$BRANCH"
+
+    rm -r "$tmp_dir"
+    trap '' EXIT
+}
+
+main_unstable() {
+    local force=false
+
+    local package debian_codename
+    for package in "${PACKAGES[@]}"; do
+        for debian_codename in "${DEBIAN_VERSIONS[@]}"; do
+            echo "-------------------------------------"
+            echo "Looking for update in ${package} for ${debian_codename}..."
+
+            local repo=$GIT_REPOS_DIR/$PACKAGE
+            local url="${PROJECT_URLS[$package]}"
+            git_fetch "$repo" "$url"
+
+            local gitbranch="${PROJECT_BRANCHES[$debian_codename]}"
+            git_checkout_branch "$repo" "$gitbranch"
+
+            local flag_file="$DATA_DIR/${debian_codename}_${package}.timestamp"
+            if ! check_build_needed "$repo" "$flag_file"; then
+                if [[ "$force" == "true" ]]; then
+                    echo "Sources up-to-date but forcing build anyway."
+                else
+                    echo "Sources up-to-date, nothing to build."
+                    continue
+                fi
+            fi
+
+            local version
+            version=$(debian_get_daily_version "$repo")
+
+            debian_changelog_set_daily_version "$repo" "$version"
+
+            build_package_all_archs "$tmp_dir" "$debian_codename" "$package" "$version" "unstable"
+
+            distribute_package_all_archs "$tmp_dir" "$debian_codename" "$package" "$version" "unstable"
+
+            debian_changelog_revert "$repo"
+            set_build_needed_timestamp "$repo" "$flag_file"
+
+        done
     done
-
-    for arch in "${ARCHS_DONE[@]}"; do
-        arch_no_all=$arch
-        if [[ "$arch_no_all" == "all" ]]; then
-            arch_no_all="amd64"
-        fi
-
-        if ! distribute_package "$TMP_DIR" "$FIXME" "$DEBIAN_REL" "$PACKAGE" "$VERSION" "$BRANCH" "$arch_no_all"; then
-            notify failure "Failed to include change of $PACKAGE/$VERSION for $DEBIAN_REL/$BRANCH/$arch ?!"
-            return 1
-        fi
-
-        notify success "Completed build for $PACKAGE/$VERSION for $DEBIAN_REL/$BRANCH/$arch."
-    done
+    echo "-------------------------------------"
 }
 
 main "$@"

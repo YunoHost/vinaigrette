@@ -9,3 +9,14 @@ declare -A PROJECT_URLS=(
     [moulinette]=https://github.com/yunohost/moulinette
     [SSOwat]=https://github.com/yunohost/SSOwat
 )
+
+declare -A DEBIAN_VERSIONS=(
+    [11]="bullseye"
+    [12]="bookworm"
+    [13]="trixie"
+)
+
+declare -A PROJECT_BRANCHES=(
+    [bookworm]="dev"
+    [trixie]="trixie"
+)
