@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 
 setup_tmpdir() {
-    local pkgdir=$1
+    local repodir=$1
     local tmp_dir=$2
 
     # Move files to a tmp folder
     mkdir -p "$tmp_dir/sources"
 
     local tmp_archive="$tmp_dir/git_archive.tar.gz"
-    git -C "$pkgdir" ls-files | xargs tar -C "$pkgdir" -czf "$tmp_archive"
+    git -C "$repodir" ls-files | xargs tar -C "$repodir" -czf "$tmp_archive"
     tar xzf "$tmp_archive" -C "$tmp_dir/sources"
     rm "$tmp_archive"
 }

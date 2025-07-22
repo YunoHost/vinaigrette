@@ -59,9 +59,10 @@ check_build_needed() {
     [ "$head_commit_time" -ge "$last_build_commit_time" ]
 }
 
-set_build_needed_flag() {
-    local flag_file=$1
+set_build_needed_timestamp() {
+    local repodir=$1
+    local flag_file=$2
     local head_commit_time
-    head_commit_time=$(git show -s --format=%ct HEAD)
+    head_commit_time=$(git -C "$repodir" show -s --format=%ct HEAD)
     touch -d "@$head_commit_time" "$flag_file"
 }
