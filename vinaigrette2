@@ -132,6 +132,7 @@ main() {
 
 main_unstable() {
     local force=false
+    echo "$@"
 
     if is_already_running; then
         echo "$0 is already running!"
@@ -144,7 +145,7 @@ main_unstable() {
             echo "-------------------------------------"
             echo "Looking for update in ${package} for ${debian_codename}..."
 
-            local repo=$GIT_REPOS_DIR/$PACKAGE
+            local repo=$GIT_REPOS_DIR/$package
             local url="${PROJECT_URLS[$package]}"
             git_fetch "$repo" "$url"
 
@@ -178,4 +179,12 @@ main_unstable() {
     echo "-------------------------------------"
 }
 
-main "$@"
+main_wrap() {
+    if [[ "${1:-}" == "rebuild-unstable" ]]; then
+        main_unstable "${@:2}"
+    else
+        main "$@"
+    fi
+}
+
+main_wrap "$@"
