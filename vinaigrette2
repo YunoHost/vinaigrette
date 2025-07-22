@@ -98,11 +98,9 @@ main() {
         critical "You aint in a tty (are you in a 'lxc exec' ?) The script can't run because pbuilder won't be happy :|"
     fi
 
-    local chroot_dir="$CHROOTS_DIR/$DEBIAN_REL-all"
-    if [ ! -d "$chroot_dir" ]; then
-        info "Creating chroot for Debian ${DEBIAN_REL}..."
-        make_chroot "$DEBIAN_REL" "$chroot_dir"
-    fi
+    make_chroot
+    local chroot_name
+    chroot_name=$(get_chroot_name "$DEBIAN_REL")
 
     boxed "Building $PACKAGE $BRANCH release - $VERSION version"
 
@@ -129,7 +127,7 @@ main() {
 
     boxed "Building Debian package..."
 
-    build_package_all_archs "$tmp_dir" "$DEBIAN_REL" "$PACKAGE" "$VERSION" "$BRANCH" "$chroot_dir"
+    build_package_all_archs "$tmp_dir" "$DEBIAN_REL" "$PACKAGE" "$VERSION" "$BRANCH" "$chroot_name"
 
     distribute_package_all_archs "$tmp_dir" "$DEBIAN_REL" "$PACKAGE" "$VERSION" "$BRANCH"
 
@@ -148,11 +146,10 @@ main_unstable() {
     local package debian_codename
     for package in "${PACKAGES[@]}"; do
         for debian_codename in "${DEBIAN_VERSIONS[@]}"; do
-            local chroot_dir="$CHROOTS_DIR/$DEBIAN_REL-all"
-            if [ ! -d "$chroot_dir" ]; then
-                info "Creating chroot for Debian ${DEBIAN_REL}..."
-                make_chroot "$DEBIAN_REL" "$chroot_dir"
-            fi
+
+            make_chroot
+            local chroot_name
+            chroot_name=$(get_chroot_name "$DEBIAN_REL")
 
             info "-------------------------------------"
             info "Looking for update in ${package} for ${debian_codename}..."
@@ -179,7 +176,7 @@ main_unstable() {
 
             debian_changelog_set_daily_version "$repo" "$version"
 
-            build_package_all_archs "$tmp_dir" "$debian_codename" "$package" "$version" "unstable"
+            build_package_all_archs "$tmp_dir" "$debian_codename" "$package" "$version" "unstable" "$chroot_name"
 
             distribute_package_all_archs "$tmp_dir" "$debian_codename" "$package" "$version" "unstable"
 

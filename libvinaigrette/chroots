@@ -29,11 +29,18 @@ CHROOT_PREINSTALLS=(
 # Temporary fix to run on @repo
 CHROOT_SUFFIX="-sbuild-vinaigrette2"
 
+chroot_name() {
+    local dist=$1
+    echo "$dist-$CHROOT_SUFFIX"
+}
+
 make_chroot() {
     local dist=$1
-    local chroot_dir=$2
 
-    mkdir -p "$(dirname "$chroot_dir")"
-
-    sbuild-createchroot --chroot-suffix="$CHROOT_SUFFIX" --include="${CHROOT_PREINSTALLS[*]}" "$dist" "$chroot_dir"
+    local chroot_dir="$CHROOTS_DIR/$dist-all"
+    if [ ! -d "$chroot_dir" ]; then
+        info "Creating chroot for Debian ${dist}..."
+        mkdir -p "$(dirname "$chroot_dir")"
+        sbuild-createchroot --chroot-suffix="$CHROOT_SUFFIX" --include="${CHROOT_PREINSTALLS[*]}" "$dist" "$chroot_dir"
+    fi
 }
