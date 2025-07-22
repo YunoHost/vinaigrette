@@ -99,8 +99,6 @@ main() {
     fi
 
     make_chroot "$DEBIAN_REL"
-    local chroot_name
-    chroot_name=$(get_chroot_name "$DEBIAN_REL")
 
     boxed "Building $PACKAGE $BRANCH release - $VERSION version"
 
@@ -127,7 +125,7 @@ main() {
 
     boxed "Building Debian package..."
 
-    build_package_all_archs "$tmp_dir" "$DEBIAN_REL" "$PACKAGE" "$VERSION" "$BRANCH" "$chroot_name"
+    build_package_all_archs "$tmp_dir" "$DEBIAN_REL" "$PACKAGE" "$VERSION" "$BRANCH"
 
     distribute_package_all_archs "$tmp_dir" "$DEBIAN_REL" "$PACKAGE" "$VERSION" "$BRANCH"
 
@@ -148,8 +146,6 @@ main_unstable() {
         for debian_codename in "${DEBIAN_VERSIONS[@]}"; do
 
             make_chroot "$debian_codename"
-            local chroot_name
-            chroot_name=$(get_chroot_name "$debian_codename")
 
             info "-------------------------------------"
             info "Looking for update in ${package} for ${debian_codename}..."
@@ -176,7 +172,7 @@ main_unstable() {
 
             debian_changelog_set_daily_version "$repo" "$version"
 
-            build_package_all_archs "$tmp_dir" "$debian_codename" "$package" "$version" "unstable" "$chroot_name"
+            build_package_all_archs "$tmp_dir" "$debian_codename" "$package" "$version" "unstable"
 
             distribute_package_all_archs "$tmp_dir" "$debian_codename" "$package" "$version" "unstable"
 
