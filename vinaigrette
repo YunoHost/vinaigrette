@@ -2,7 +2,8 @@
 set -Eeuo pipefail
 
 readonly THISSCRIPT=$0
-readonly SCRIPT_DIR=$(cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd)
+SCRIPT_DIR=$(cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd)
+readonly SCRIPT_DIR
 
 source "$SCRIPT_DIR/libvinaigrette/buildutils"
 source "$SCRIPT_DIR/libvinaigrette/chroots"
