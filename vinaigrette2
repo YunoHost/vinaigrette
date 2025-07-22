@@ -132,7 +132,6 @@ main() {
 
 main_unstable() {
     local force=false
-    echo "$@"
 
     if is_already_running; then
         echo "$0 is already running!"
@@ -177,6 +176,7 @@ main_unstable() {
         done
     done
     echo "-------------------------------------"
+    cleanup_pidfile
 }
 
 main_wrap() {

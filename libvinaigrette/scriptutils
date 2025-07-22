@@ -23,5 +23,35 @@ array_contains_element() {
 is_already_running() {
     local scriptname
     scriptname=$(basename "$0")
-    pidof -x "$scriptname" -o "%PPID" >/dev/null
+    local pidfile="/tmp/$scriptname"
+
+    if [ -f "$pidfile" ]; then
+        pid=$(cat "$pidfile")
+        if ps -p "$pid" > /dev/null 2>&1; then
+            return 0
+        else
+            echo "Cleaning up stale PID file..."
+            rm "$pidfile"
+        fi
+    fi
+
+    echo "$$" > "$pidfile"
+    return 1
+}
+
+cleanup_pidfile() {
+    local scriptname
+    scriptname=$(basename "$0")
+    local pidfile="/tmp/$scriptname"
+
+    if [ -f "$pidfile" ]; then
+        pid=$(cat "$pidfile")
+        if [ "$$" == "$pid" ]; then
+            rm "$pidfile"
+        else
+            echo "warning: pidfile touched by someone else ?!"
+        fi
+    else
+        echo "warning: pidfile vanished ?!"
+    fi
 }
