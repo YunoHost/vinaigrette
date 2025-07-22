@@ -121,13 +121,17 @@ main() {
     boxed "Building Debian package..."
 
     ARCHS=$(debian_determinate_archs "$TMP_DIR/sources" "$CONFIG_DIR" "${ARCHS:-}")
+    ARCHS_DONE=()
     for arch in $ARCHS; do
         notify start "Starting build for $PACKAGE/$VERSION for $DEBIAN_REL/$BRANCH/${arch}..."
         if ! build_package "$TMP_DIR" "$DEBIAN_REL" "nodebug" "$arch"; then
             notify failure "Failed build for $PACKAGE/$VERSION for $DEBIAN_REL/$BRANCH/$arch ?!"
             return 1
         fi
+        ARCHS_DONE+=("$arch")
+    done
 
+    for arch in "${ARCHS_DONE[@]}"; do
         arch_no_all=$arch
         if [[ "$arch_no_all" == "all" ]]; then
             arch_no_all="amd64"
