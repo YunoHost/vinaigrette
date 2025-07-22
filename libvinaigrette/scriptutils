@@ -30,7 +30,7 @@ is_already_running() {
         if ps -p "$pid" > /dev/null 2>&1; then
             return 0
         else
-            echo "Cleaning up stale PID file..."
+            warn "Cleaning up stale PID file..."
             rm "$pidfile"
         fi
     fi
@@ -49,9 +49,9 @@ cleanup_pidfile() {
         if [ "$$" == "$pid" ]; then
             rm "$pidfile"
         else
-            echo "warning: pidfile touched by someone else ?!"
+            warn "pidfile touched by someone else ?!"
         fi
     else
-        echo "warning: pidfile vanished ?!"
+        warn "pidfile vanished ?!"
     fi
 }

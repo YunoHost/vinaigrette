@@ -13,7 +13,7 @@ debian_changelog_set_daily_version() {
     local pkgdir=$1
     local version_daily=$2
 
-    echo "> Setting version in changelog to $version"
+    info "> Setting version in changelog to $version"
 
     rm -f "$pkgdir/debian/changelog.dch"
     cp "$pkgdir/debian/changelog" "$pkgdir/debian/changelog.old"
@@ -30,7 +30,7 @@ debian_changelog_set_daily_version() {
 
 debian_changelog_revert() {
     local pkgdir=$1
-    echo "> Restoring previous changelog"
+    info "> Restoring previous changelog"
     mv "$pkgdir/debian/changelog.old" "$pkgdir/debian/changelog"
 }
 

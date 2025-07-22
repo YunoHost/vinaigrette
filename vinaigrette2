@@ -83,7 +83,7 @@ validate_branch() {
     local repo=$1
     # check if the build branch type is coherent between what the user has specified and what is specified in the changelog
     if ! [[ "$(head -n 1 "$repo/debian/changelog")" == *"$BRANCH"* ]]; then
-       echo "The specified branch is not coherent with the changelog one!"
+       error "The specified branch is not coherent with the changelog one!"
        exit 1
     fi
 }
@@ -141,7 +141,7 @@ main_unstable() {
     local force=false
 
     if is_already_running; then
-        echo "$0 is already running!"
+        error "$0 is already running!"
         exit 0
     fi
 
@@ -154,8 +154,8 @@ main_unstable() {
                 make_chroot "$DEBIAN_REL" "$chroot_dir"
             fi
 
-            echo "-------------------------------------"
-            echo "Looking for update in ${package} for ${debian_codename}..."
+            info "-------------------------------------"
+            info "Looking for update in ${package} for ${debian_codename}..."
 
             local repo=$GIT_REPOS_DIR/$package
             local url="${PROJECT_URLS[$package]}"
@@ -167,9 +167,9 @@ main_unstable() {
             local flag_file="$DATA_DIR/${debian_codename}_${package}.timestamp"
             if ! check_build_needed "$repo" "$flag_file"; then
                 if [[ "$force" == "true" ]]; then
-                    echo "Sources up-to-date but forcing build anyway."
+                    warn "Sources up-to-date but forcing build anyway."
                 else
-                    echo "Sources up-to-date, nothing to build."
+                    info "Sources up-to-date, nothing to build."
                     continue
                 fi
             fi
@@ -188,7 +188,7 @@ main_unstable() {
 
         done
     done
-    echo "-------------------------------------"
+    info "-------------------------------------"
     cleanup_pidfile
 }
 
