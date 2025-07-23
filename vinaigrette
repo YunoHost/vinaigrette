@@ -20,7 +20,7 @@ readonly DATA_DIR="$SCRIPT_DIR/data"
 readonly GIT_REPOS_DIR="$DATA_DIR/git_repos"
 readonly CHROOTS_DIR="$DATA_DIR/chroots"
 readonly BUILDS_DIR="$DATA_DIR/builds"
-readonly REPO_DIR="$DATA_DIR/.../www/debian"
+readonly REPO_DIR="$SCRIPT_DIR/.../www/debian"
 
 usage() {
     cat << EOF
