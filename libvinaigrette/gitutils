@@ -56,7 +56,7 @@ check_build_needed() {
     local head_commit_time
     head_commit_time=$(git -C "$repodir" show -s --format=%ct HEAD)
 
-    [ "$head_commit_time" -ge "$last_build_commit_time" ]
+    [ "$head_commit_time" -gt "$last_build_commit_time" ]
 }
 
 set_build_needed_timestamp() {
