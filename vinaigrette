@@ -130,7 +130,8 @@ main() {
 
     build_package_all_archs "$tmp_dir" "$DEBIAN_REL" "$PACKAGE" "$VERSION" "$BRANCH"
 
-    distribute_package_all_archs "$REPO_DIR" "$tmp_dir" "$DEBIAN_REL" "$PACKAGE" "$VERSION" "$BRANCH"
+    package_source_name="$(debian_source "$tmp_dir/sources")"
+    distribute_package_all_archs "$REPO_DIR" "$tmp_dir" "$DEBIAN_REL" "$PACKAGE" "$package_source_name" "$VERSION" "$BRANCH"
 
     rm -r "$tmp_dir"
     trap '' EXIT
