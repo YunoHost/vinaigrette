@@ -42,7 +42,7 @@ distribute_package() {
     local repository_dir=$1
     local tmp_dir=$2
     local debian_codename=$3
-    local package=$4
+    local package_sourcename=$4
     local version=$5
     local branch=$6
     local arch=$7
@@ -51,7 +51,7 @@ distribute_package() {
         --basedir "$repository_dir" \
         --component "$branch" \
         include "$debian_codename" \
-        "$tmp_dir/${package}_${version}_${arch}.changes"
+        "$tmp_dir/${package_sourcename}_${version}_${arch}.changes"
 }
 
 build_package_all_archs() {
@@ -82,8 +82,9 @@ distribute_package_all_archs() {
     local tmp_dir=$2
     local debian_codename=$3
     local package=$4
-    local version=$5
-    local branch=$6
+    local package_sourcename=$5
+    local version=$6
+    local branch=$7
 
     for arch in "${ARCHS_DONE[@]}"; do
         local arch_no_all=$arch
@@ -91,7 +92,7 @@ distribute_package_all_archs() {
             arch_no_all="amd64"
         fi
 
-        if ! distribute_package "$repository_dir" "$tmp_dir" "$debian_codename" "$package" "$version" "$branch" "$arch_no_all"; then
+        if ! distribute_package "$repository_dir" "$tmp_dir" "$debian_codename" "$package_sourcename" "$version" "$branch" "$arch_no_all"; then
             notify failure "Failed to include change of $package/$version for $debian_codename/$branch/$arch ?!"
             return 1
         fi

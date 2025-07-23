@@ -186,7 +186,8 @@ main_unstable() {
 
             build_package_all_archs "$tmp_dir" "$debian_codename" "$package" "$version" "unstable"
 
-            distribute_package_all_archs "$REPO_DIR" "$tmp_dir" "$debian_codename" "$package" "$version" "unstable"
+            package_source_name="$(debian_source "$tmp_dir/sources")"
+            distribute_package_all_archs "$REPO_DIR" "$tmp_dir" "$debian_codename" "$package" "$package_source_name" "$version" "unstable"
 
             debian_changelog_revert "$repo"
             set_build_needed_timestamp "$repo" "$flag_file"
