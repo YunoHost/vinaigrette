@@ -34,10 +34,6 @@ CHROOT_PREINSTALLS_TRIXIE=(
 
 )
 
-
-# Temporary fix to run on @repo
-CHROOT_SUFFIX="-sbuild-vinaigrette2"
-
 make_chroot() {
     local dist=$1
 
@@ -52,6 +48,6 @@ make_chroot() {
     if [ ! -d "$chroot_dir" ]; then
         info "Creating chroot for Debian ${dist}..."
         mkdir -p "$(dirname "$chroot_dir")"
-        sbuild-createchroot --chroot-suffix="$CHROOT_SUFFIX" --include="${chroot_preinstalls[*]}" "$dist" "$chroot_dir"
+        sbuild-createchroot --include="${chroot_preinstalls[*]}" "$dist" "$chroot_dir"
     fi
 }
