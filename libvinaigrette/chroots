@@ -31,7 +31,7 @@ CHROOT_PREINSTALLS_BOOKWORM=(
 )
 
 CHROOT_PREINSTALLS_TRIXIE=(
-
+    gpgv
 )
 
 make_chroot() {
