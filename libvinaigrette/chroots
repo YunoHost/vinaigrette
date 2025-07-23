@@ -11,7 +11,7 @@ CHROOT_PREINSTALLS=(
     dh-python
     eatmydata
     git
-    libidn11-dev
+
     liblua5.1-0-dev
     libssl-dev
     lua5.1
@@ -26,16 +26,32 @@ CHROOT_PREINSTALLS=(
     wget
 )
 
+CHROOT_PREINSTALLS_BOOKWORM=(
+    libidn11-dev
+)
+
+CHROOT_PREINSTALLS_TRIXIE=(
+
+)
+
+
 # Temporary fix to run on @repo
 CHROOT_SUFFIX="-sbuild-vinaigrette2"
 
 make_chroot() {
     local dist=$1
 
+    local chroot_preinstalls
+    case "$dist" in
+        bookworm) chroot_preinstalls=( "${CHROOT_PREINSTALLS[@]}" "${CHROOT_PREINSTALLS_BOOKWORM[@]}" ) ;;
+        trixie) chroot_preinstalls=( "${CHROOT_PREINSTALLS[@]}" "${CHROOT_PREINSTALLS_TRIXIE[@]}" ) ;;
+        *) chroot_preinstalls=( "${CHROOT_PREINSTALLS[@]}" ) ;;
+    esac
+
     local chroot_dir="$CHROOTS_DIR/$dist-all"
     if [ ! -d "$chroot_dir" ]; then
         info "Creating chroot for Debian ${dist}..."
         mkdir -p "$(dirname "$chroot_dir")"
-        sbuild-createchroot --chroot-suffix="$CHROOT_SUFFIX" --include="${CHROOT_PREINSTALLS[*]}" "$dist" "$chroot_dir"
+        sbuild-createchroot --chroot-suffix="$CHROOT_SUFFIX" --include="${chroot_preinstalls[*]}" "$dist" "$chroot_dir"
     fi
 }
