@@ -20,3 +20,5 @@ declare -A UNSTABLE_PROJECT_BRANCHES=(
     [bookworm]="dev"
     [trixie]="trixie"
 )
+
+EXTERNAL_PACKAGES=(lexicon python3-lexicon)
