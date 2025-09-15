@@ -8,9 +8,11 @@ setup_tmpdir() {
     mkdir -p "$tmp_dir/sources"
 
     local tmp_archive="$tmp_dir/git_archive.tar.gz"
-    git -C "$repodir" ls-files | xargs tar -C "$repodir" -czf "$tmp_archive"
+    local tmp_filelist="$tmp_dir/git_archive_filelist.txt"
+    git -C "$repodir" ls-files > "$tmp_filelist"
+    xargs tar -C "$repodir" -czf "$tmp_archive" -T "$tmp_filelist"
     tar xzf "$tmp_archive" -C "$tmp_dir/sources"
-    rm "$tmp_archive"
+    rm "$tmp_archive" "$tmp_filelist"
 }
 
 build_package() {
