@@ -1,0 +1,102 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+readonly THISSCRIPT=$0
+SCRIPT_DIR=$(cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd)
+readonly SCRIPT_DIR
+
+source "$SCRIPT_DIR/libvinaigrette/buildutils"
+source "$SCRIPT_DIR/libvinaigrette/chroots"
+source "$SCRIPT_DIR/libvinaigrette/config"
+source "$SCRIPT_DIR/libvinaigrette/debutils"
+source "$SCRIPT_DIR/libvinaigrette/gitutils"
+source "$SCRIPT_DIR/libvinaigrette/logging"
+source "$SCRIPT_DIR/libvinaigrette/scriptutils"
+
+# Set some path variables
+
+readonly CONFIG_DIR="$SCRIPT_DIR/config"
+readonly DATA_DIR="$SCRIPT_DIR/data"
+readonly GIT_REPOS_DIR="$DATA_DIR/git_repos"
+readonly CHROOTS_DIR="$DATA_DIR/chroots"
+readonly BUILDS_DIR="$DATA_DIR/builds"
+readonly REPO_DIR="$SCRIPT_DIR/../www/debian"
+
+usage() {
+    cat << EOF
+Usage:
+    $THISSCRIPT <project> <branch>
+
+Arguments:
+    <project>   $(array_print_sep ", " "${EXTERNAL_PACKAGES[@]}")
+    <branch>    testing or stable
+    <debian release> 12 or 13 or…
+EOF
+}
+
+setargs() {
+    if (( "$#" != "3" )); then
+        critical "Error: expecting 3 arguments."
+        return 1
+    fi
+    PACKAGE=$1
+    BRANCH=$2
+    DEBIAN_REL=$3
+
+    if ! array_contains_element "$PACKAGE" "${EXTERNAL_PACKAGES[@]}" ; then
+        critical "Invalid package $PACKAGE"
+        return 1
+    fi
+    if ! grep -q "^Components: .*$BRANCH.*$" "$CONFIG_DIR/distributions"; then
+        critical "Invalid branch $BRANCH"
+        return 1
+    fi
+    if ! array_contains_element "$DEBIAN_REL" "${!DEBIAN_VERSIONS[@]}" ; then
+        critical "Invalid Debian version $DEBIAN_REL"
+        return 1
+    fi
+    DEBIAN_CODENAME="${DEBIAN_VERSIONS[$DEBIAN_REL]}"
+}
+
+lexicon_get_version() {
+    local repo=$1
+    echo "$(debian_version "$repo")+ynh$DEBIAN_REL"
+}
+
+main() {
+    if ! setargs "$@"; then
+        usage
+        exit 1
+    fi
+
+    local tmp_main_dir
+    mkdir -p "$BUILDS_DIR"
+    tmp_main_dir="$(mktemp -d -p "$BUILDS_DIR/" --suffix="-unstable")"
+    trap 'rm -rf -- "'"$tmp_main_dir"'"' EXIT
+
+    make_chroot "$DEBIAN_CODENAME"
+
+    boxed "Building $PACKAGE $BRANCH for $DEBIAN_CODENAME..."
+
+    local repo=$GIT_REPOS_DIR/$PACKAGE
+
+    version=$(lexicon_get_version "$repo")
+
+    debian_changelog_set_daily_version "$repo" "$version"
+
+    tmp_dir="$tmp_main_dir/$PACKAGE-$DEBIAN_CODENAME"
+    info "Exporting in ${tmp_dir}..."
+    setup_tmpdir "$repo" "$tmp_dir"
+
+    # Move the orig tarball one level up…
+    mv "$tmp_dir/sources/"*.orig.* "$tmp_dir"
+
+    build_package_all_archs "$tmp_dir" "$DEBIAN_CODENAME" "$PACKAGE" "$version" "unstable"
+
+    package_source_name="$(debian_source "$tmp_dir/sources")"
+    distribute_package_all_archs "$REPO_DIR" "$tmp_dir" "$DEBIAN_CODENAME" "$PACKAGE" "$package_source_name" "$version" "unstable"
+
+    debian_changelog_revert "$repo"
+}
+
+main "$@"
