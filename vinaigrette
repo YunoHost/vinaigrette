@@ -164,6 +164,8 @@ main_unstable() {
             git_fetch "$repo" "$url"
 
             local gitbranch="${UNSTABLE_PROJECT_BRANCHES[$debian_codename]}"
+            # Just in case the script was aborted…
+            debian_changelog_revert "$repo"
             git_checkout_branch "$repo" "$gitbranch"
 
             local flag_file="$DATA_DIR/${debian_codename}_${package}.timestamp"

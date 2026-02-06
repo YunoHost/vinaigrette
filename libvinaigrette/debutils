@@ -30,8 +30,10 @@ debian_changelog_set_daily_version() {
 
 debian_changelog_revert() {
     local pkgdir=$1
-    info "> Restoring previous changelog"
-    mv "$pkgdir/debian/changelog.old" "$pkgdir/debian/changelog"
+    if [ -f "$pkgdir/debian/changelog.old" ]; then
+        info "> Restoring previous changelog"
+        mv "$pkgdir/debian/changelog.old" "$pkgdir/debian/changelog"
+    fi
 }
 
 debian_source() {
