@@ -68,13 +68,34 @@ setargs() {
     fi
 }
 
+# Source - https://stackoverflow.com/a/29436423
+# Posted by Tiago Lopo, modified by community. See post 'Timeline' for change history
+# Retrieved 2026-09-03, License - CC BY-SA 3.0
+
+function yes_or_no {
+    while true; do
+        read -p "$* [y/n]: " yn
+        case $yn in
+            [Yy]*) return 0  ;;  
+            [Nn]*) echo "Aborted" ; return  1 ;;
+        esac
+    done
+}
+
+
 validate_git_tag() {
     local repo=$1
     local tag=$2
 
+    # FIXME: issue with tag debian/12.1.4 (the tag signature has a different hash on top of the target commit)
+    # "critical" is turned into "warn", and "return 1" is disabled
     if ! git_assert_tag_is_head "$repo" "$tag"; then
-        critical "Tag $tag is not the HEAD of the branch :/"
-        return 1
+        warn "Tag $tag is not the HEAD of the branch :/"
+        read -p "Continue anyways? [y/N] " continue_tag_is_head
+        case $continue_tag_is_head in
+            [Yy]*) info "Continuing" ;;  
+            *) critical "Aborted" ; return  1 ;;
+        esac
     fi
     if [[ "$VERSION" != "$(debian_version "$repo")" ]]; then
         critical "Version $VERSION is not the last version in changelog"
