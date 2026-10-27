@@ -76,7 +76,7 @@ function yes_or_no {
     while true; do
         read -p "$* [y/n]: " yn
         case $yn in
-            [Yy]*) return 0  ;;  
+            [Yy]*) return 0  ;;
             [Nn]*) echo "Aborted" ; return  1 ;;
         esac
     done
@@ -93,7 +93,7 @@ validate_git_tag() {
         warn "Tag $tag is not the HEAD of the branch :/"
         read -p "Continue anyways? [y/N] " continue_tag_is_head
         case $continue_tag_is_head in
-            [Yy]*) info "Continuing" ;;  
+            [Yy]*) info "Continuing" ;;
             *) critical "Aborted" ; return  1 ;;
         esac
     fi
@@ -117,9 +117,9 @@ main() {
         exit 1
     fi
 
-    if [[ "$(tty)" == "not a tty" ]]; then
-        critical "You aint in a tty (are you in a 'lxc exec' ?) The script can't run because pbuilder won't be happy :|"
-    fi
+    # if [[ "$(tty)" == "not a tty" ]]; then
+    #     critical "You aint in a tty (are you in a 'lxc exec' ?) The script can't run because pbuilder won't be happy :|"
+    # fi
 
     make_chroot "$DEBIAN_REL"
 
