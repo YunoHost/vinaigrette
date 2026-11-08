@@ -1,0 +1,64 @@
+[project]
+name = "vinaigrette"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Félix Piédallu", email = "felix@piedallu.me" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "packaging",
+    "pydantic>=2.14.2",
+    "pygithub",
+    "colorlog",
+]
+
+[project.scripts]
+vinaigrette = "vinaigrette:main"
+
+[build-system]
+requires = ["uv_build>=0.13.7,<0.14.0"]
+build-backend = "uv_build"
+
+[tool.uv]
+package = true
+
+[tool.mypy]
+follow_imports = "normal"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+ignore_missing_imports = false
+strict = true
+
+[tool.ruff]
+line-length = 120
+
+lint.select = ["ALL"]
+lint.ignore = [
+    "C901",     # is too complex
+    "COM812",   # missing-trailing-comma
+    "CPY001",   # Missing copyright notice at top of file
+    "D",        # docstrings
+    "EM101",    # Exception must not use a string literal, assign to variable first
+    "EM102",    # Exception must not use an f-string literal, assign to variable first
+    "ERA001",   # Found commented-out code
+    "EXE001",   # Shebang is present but file is not executable
+    "FIX002",   # Line contains TODO, consider resolving the issue
+    "G004",     # Logging statement uses f-string
+    "LOG015",   # calls on root logger
+    "PLR",      # Code complexity
+    "RET504",   # Unnecessary assignment to `value` before `return` statement
+    "S101",     # Use of `assert` detected
+    "S603",     # Subprocess with untrusted input
+    "S607",     # Subprocess with a partial path
+    "T201",     # `print` found
+    "TD",       # TODO format
+    "TRY003",   # Avoid specifying long messages outside the exception class
+    "TRY300",   # Consider moving this statement to an `else` block
+    "TRY400",   # Use `logging.exception` instead of `logging.error`
+]
+
+[tool.ty.rules]
+all = "error"

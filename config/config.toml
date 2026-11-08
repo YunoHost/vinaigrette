@@ -1,0 +1,7 @@
+[projects]
+
+forge = "https://github.com"
+organization = "yunohost"
+version_re = "^debian/(.*)$"
+
+projects = ["yunohost", "moulinette", "ssowat"]
