@@ -12,9 +12,9 @@ base_config = ConfigDict(validate_default=True, extra="forbid")
 class ProjectsConfig(BaseModel):
     model_config = base_config
 
-    forge: str
     organization: str
     projects: list[str]
+    external_projects: list[str]
     version_re: str
 
 
@@ -22,6 +22,7 @@ class Config(BaseModel):
     model_config = base_config
 
     projects: ProjectsConfig
+    unstable_debian_branches: dict[str, str]
 
 
 def get_config(path: Path | None = None) -> Config:

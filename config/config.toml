@@ -1,7 +1,20 @@
 [projects]
 
-forge = "https://github.com"
 organization = "yunohost"
 version_re = "^debian/(.*)$"
 
-projects = ["yunohost", "moulinette", "ssowat"]
+projects = [
+    "yunohost",
+    "yunohost-admin",
+    "yunohost-portal",
+    "moulinette",
+    "ssowat",
+]
+
+external_projects = [
+    "lexicon"
+]
+
+[unstable_debian_branches]
+bookworm = "dev"
+trixie = "trixie"
