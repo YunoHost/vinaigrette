@@ -190,9 +190,9 @@ def main() -> None:
 
     for project in projects:
         if args.unstable:
-            project.find_repo_branch_last_run(config.unstable_debian_branches[debian_rel])
+            project.find_repo_branch_last_run(config.debians[debian_rel].unstable_branch)
         else:
-            project.find_repo_tag_last_run(config.projects.version_re, tag_name=args.tag)
+            project.find_repo_tag_last_run(config.debians[debian_rel].version_re, tag_name=args.tag)
         project.find_repo_tag_artifact()
 
     if not args.yes:

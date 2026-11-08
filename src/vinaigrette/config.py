@@ -11,18 +11,21 @@ base_config = ConfigDict(validate_default=True, extra="forbid")
 
 class ProjectsConfig(BaseModel):
     model_config = base_config
-
     organization: str
     projects: list[str]
     external_projects: list[str]
+
+
+class DebiansConfig(BaseModel):
+    model_config = base_config
     version_re: str
+    unstable_branch: str
 
 
 class Config(BaseModel):
     model_config = base_config
-
     projects: ProjectsConfig
-    unstable_debian_branches: dict[str, str]
+    debians: dict[str, DebiansConfig]
 
 
 def get_config(path: Path | None = None) -> Config:

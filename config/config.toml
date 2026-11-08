@@ -1,7 +1,6 @@
 [projects]
 
 organization = "yunohost"
-version_re = "^debian/(.*)$"
 
 projects = [
     "yunohost",
@@ -15,6 +14,11 @@ external_projects = [
     "lexicon"
 ]
 
-[unstable_debian_branches]
-bookworm = "dev"
-trixie = "trixie"
+[debians]
+[debians.bookworm]
+version_re = "^debian/12\\.(.*)$"
+unstable_branch = "dev"
+
+[debians.trixie]
+version_re = "^debian/13\\.(.*)$"
+unstable_branch = "trixie"
