@@ -13,6 +13,7 @@ from typing import cast
 import colorlog
 import github
 import github.Artifact
+import github.Commit
 import github.Repository
 import github.Tag
 import github.WorkflowRun
@@ -26,6 +27,7 @@ class Project:
     def __init__(self, repo: github.Repository.Repository) -> None:
         self.repo = repo
         self.name = self.repo.name
+        self.ci_run: github.WorkflowRun.WorkflowRun | None
         self.tag: github.Tag.Tag | None = None
         self.artifact: github.Artifact.Artifact | None = None
         self.extract_dir: Path | None = None
@@ -42,14 +44,6 @@ class Project:
         }
         return tags.get(max(tags, default=None))
 
-    def repo_find_tag(self, version_re: str, *, tag: str | None) -> None:
-        regex = version_re if tag is None else rf"^{tag}$"
-        if (found := self.repo_find_last_tag(regex)) is None:
-            msg = f"{self.name}: No tag {tag} not found matching '{regex}'!"
-            raise RuntimeError(msg)
-        self.tag = found
-        logging.info(f"{self.name}: Found matching tag {self.tag.name} (commit is {self.tag.commit.sha})")
-
     def repo_commit_last_run(self, commit: github.Commit.Commit, head: str) -> github.WorkflowRun.WorkflowRun | None:
         runs = {
             run.run_number: run
@@ -58,33 +52,55 @@ class Project:
         }
         return runs.get(max(runs, default=None))
 
-    def find_repo_tag_artifact(self) -> None:
-        assert self.tag is not None
-        if (tag_run := self.repo_commit_last_run(self.tag.commit, self.tag.name)) is None:
-            msg = f"{self.name}: no workflow run found for tag {self.tag.name}"
+    def find_repo_tag_last_run(self, version_re: str, *, tag_name: str | None) -> None:
+        regex = version_re if tag_name is None else rf"^{tag_name}$"
+        if (tag := self.repo_find_last_tag(regex)) is None:
+            msg = f"{self.name}: No tag {tag_name} not found matching '{regex}'!"
             raise RuntimeError(msg)
-        run_state = cast("tuple[str, str | None]", (tag_run.status, tag_run.conclusion))
-        logging.info(
-            f"{self.name}: run '{tag_run.name}' is {tag_run.status} ({tag_run.conclusion}), see {tag_run.html_url}"
-        )
+        logging.info(f"{self.name}: Found matching tag {tag.name} (commit is {tag.commit.sha})")
 
+        if (tag_run := self.repo_commit_last_run(tag.commit, tag.name)) is None:
+            msg = f"{self.name}: no workflow run found for tag {tag.name}"
+            raise RuntimeError(msg)
+        if msg := self.ci_run_is_valid(tag_run) is not None:
+            raise RuntimeError(msg)
+        self.ci_run = tag_run
+
+    def find_repo_branch_last_run(self, branch_name: str) -> None:
+        logging.info(f"{self.name}: Searching for a CI run for branch {branch_name}...")
+        for it, commit in enumerate(self.repo.get_commits(sha=branch_name)):
+            logging.debug(f"Searching for a CI run for commit {commit.sha}...")
+            if (run := self.repo_commit_last_run(commit, branch_name)) is None:
+                msg = "Could not find a CI run!"
+            elif (msg := self.ci_run_is_valid(run)) is None:
+                logging.info(f"{self.name}: Found branch commit with CI run: {commit.sha}")
+                self.ci_run = run
+                return
+            logging.warning(f"{self.name}: Branch {branch_name} commit {commit.sha} was skipped: {msg}")
+            if it >= 10:
+                raise RuntimeError(f"{self.name}: Could not find a commit with a valid CI run!")
+
+    def ci_run_is_valid(self, run: github.WorkflowRun.WorkflowRun) -> str | None:
+        run_state = cast("tuple[str, str | None]", (run.status, run.conclusion))
+        msg = f"{self.name}: run '{run.name}' is {run.status} ({run.conclusion}), see {run.html_url}"
+        logging.info(msg)
         if run_state == ("in_progress", None):
-            msg = f"{self.name}: workflow run {tag_run.id} is still running!"
-            raise RuntimeError(msg)
-
+            return f"{self.name}: workflow run {run.id} is still running!"
         if run_state != ("completed", "success"):
-            msg = f"{self.name}: workflow run {tag_run.id} was not successful!"
-            raise RuntimeError(msg)
+            return f"{self.name}: workflow run {run.id} was not successful!"
+        return None
 
+    def find_repo_tag_artifact(self) -> None:
+        assert self.ci_run is not None
         artifacts: list[github.Artifact.Artifact] = []
-        for artifact in tag_run.get_artifacts():
+        for artifact in self.ci_run.get_artifacts():
             if artifact.expired:
                 logging.warning(f"{self.name}: artifact {artifact.name} has expired")
                 continue
             artifacts.append(artifact)
 
         if len(artifacts) != 1:
-            msg = f"{self.name}: workflow run {tag_run.id} should have one and only one artifact, has {len(artifacts)}!"
+            msg = f"{self.name}: workflow run {self.ci_run.id} should have one and only one artifact, has {len(artifacts)}!"
             raise RuntimeError(msg)
         self.artifact = artifacts[0]
         logging.info(f"{self.name}: Found artifact: {self.artifact.name}")
@@ -144,7 +160,10 @@ def main() -> None:
     parser.add_argument("-g", "--github-token", required=env_token is None, help="Github Token, or export GITHUB_TOKEN")
     parser.add_argument("-p", "--project", type=str, help="Project to handle, all if not specified")
     parser.add_argument("-t", "--tag", type=str, help="Git tag to use, for a single project")
+    parser.add_argument("-u", "--unstable", action="store_true", help="Fetch builds for HEADs of dev branches")
     parser.add_argument("-r", "--repository", type=Path, help="Path to the Debian repository")
+    parser.add_argument("-b", "--branch", type=str, help="Debian branch (stable, testing, unstable)")
+    parser.add_argument("-d", "--debian", type=str, required=True, help="Debian version (bookworm, trixie etc)")
     parser.add_argument("-y", "--yes", type=str, help="Reply yes to all questions")
     parser.add_argument("-w", "--workdir", type=Path, required=True, help="Work directory (to extract the artifacts)")
     args = parser.parse_args()
@@ -153,10 +172,15 @@ def main() -> None:
     if args.tag and not args.project:
         logging.error("--tag is only valid when --project is passed!")
         raise SystemExit(1)
+    if args.tag and args.unstable:
+        logging.error("--tag and --unstable are incompatible!")
+        raise SystemExit(1)
 
     workdir = cast("Path", args.workdir).resolve()
     repository = cast("Path | None", args.repository)
     token = args.github_token or env_token
+    branch = "unstable" if args.unstable else cast("str", args.branch)
+    debian_rel = cast("str", args.debian)
     assert token is not None
 
     gh = github.Github(auth=github.Auth.Token(token))
@@ -167,7 +191,10 @@ def main() -> None:
     projects = [Project(org.get_repo(project)) for project in projects]
 
     for project in projects:
-        project.repo_find_tag(config.projects.version_re, tag=args.tag)
+        if args.unstable:
+            project.find_repo_branch_last_run(config.unstable_debian_branches[debian_rel])
+        else:
+            project.find_repo_tag_last_run(config.projects.version_re, tag_name=args.tag)
         project.find_repo_tag_artifact()
 
     if not args.yes:
@@ -185,4 +212,4 @@ def main() -> None:
 
     if repository:
         for project in projects:
-            project.distribute_package(repository, branch="unstable", debian_codename="trixie")
+            project.distribute_package(repository, branch=branch, debian_codename=debian_rel)
