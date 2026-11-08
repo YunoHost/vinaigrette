@@ -100,7 +100,7 @@ class Project:
         artifacts = list(filter(artifact_filter, self.ci_run.get_artifacts()))
 
         if len(artifacts) != 1:
-            msg = f"{self.name}: workflow run {self.ci_run.id} should have one and only one artifact, has {len(artifacts)}!"
+            msg = f"{self.name}: workflow run {self.ci_run.id} should have one artifact, has {len(artifacts)}!"
             raise RuntimeError(msg)
         self.artifact = artifacts[0]
         logging.info(f"{self.name}: Found artifact: {self.artifact.name}")
@@ -158,7 +158,8 @@ def main() -> None:
     env_token = os.environ.get("GITHUB_TOKEN", None)
     parser = argparse.ArgumentParser()
     parser.add_argument("-v", "--verbose", default=0, action="count", help="Verbosity, can be used multiple times")
-    parser.add_argument("-g", "--github-token", required=env_token is None, default=env_token, help="Github Token, or export GITHUB_TOKEN")
+    help_ = "Github Token, or export GITHUB_TOKEN"
+    parser.add_argument("-g", "--github-token", required=env_token is None, default=env_token, help=help_)
     parser.add_argument("-p", "--project", type=str, help="Project to handle, all if not specified")
     parser.add_argument("-t", "--tag", type=str, help="Git tag to use, for a single project")
     parser.add_argument("-u", "--unstable", action="store_true", help="Fetch builds for HEADs of dev branches")
