@@ -42,11 +42,13 @@ class Project:
         }
         return tags.get(max(tags, default=None))
 
-    def repo_set_tag(self, tag: str) -> None:
-        if (found := self.repo_find_last_tag(rf"^{tag}$")) is None:
-            msg = f"{self.name}: Tag {tag} not found!"
+    def repo_find_tag(self, version_re: str, *, tag: str | None) -> None:
+        regex = version_re if tag is None else rf"^{tag}$"
+        if (found := self.repo_find_last_tag(regex)) is None:
+            msg = f"{self.name}: No tag {tag} not found matching '{regex}'!"
             raise RuntimeError(msg)
         self.tag = found
+        logging.info(f"{self.name}: Found matching tag {self.tag.name} (commit is {self.tag.commit.sha})")
 
     def repo_tag_last_run(self, tag: github.Tag.Tag) -> github.WorkflowRun.WorkflowRun | None:
         runs = {
@@ -56,14 +58,8 @@ class Project:
         }
         return runs.get(max(runs, default=None))
 
-    def find_repo_tag_artifact(self, version_re: str) -> None:
-        if self.tag is None:
-            self.tag = self.repo_find_last_tag(version_re)
-        if self.tag is None:
-            msg = f"{self.name}: no tags found"
-            raise RuntimeError(msg)
-        logging.info(f"{self.name}: latest tag is {self.tag.name} ({self.tag.commit.sha})")
-
+    def find_repo_tag_artifact(self) -> None:
+        assert self.tag is not None
         if (tag_run := self.repo_tag_last_run(self.tag)) is None:
             msg = f"{self.name}: no workflow run found for tag {self.tag.name}"
             raise RuntimeError(msg)
@@ -171,9 +167,8 @@ def main() -> None:
     projects = [Project(org.get_repo(project)) for project in projects]
 
     for project in projects:
-        if args.tag:
-            project.repo_set_tag(args.tag)
-        project.find_repo_tag_artifact(config.projects.version_re)
+        project.repo_find_tag(config.projects.version_re, tag=args.tag)
+        project.find_repo_tag_artifact()
 
     if not args.yes:
         while True:
