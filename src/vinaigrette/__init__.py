@@ -50,17 +50,17 @@ class Project:
         self.tag = found
         logging.info(f"{self.name}: Found matching tag {self.tag.name} (commit is {self.tag.commit.sha})")
 
-    def repo_tag_last_run(self, tag: github.Tag.Tag) -> github.WorkflowRun.WorkflowRun | None:
+    def repo_commit_last_run(self, commit: github.Commit.Commit, head: str) -> github.WorkflowRun.WorkflowRun | None:
         runs = {
             run.run_number: run
-            for run in self.repo.get_workflow_runs(event="push", head_sha=tag.commit.sha)
-            if run.head_branch == tag.name
+            for run in self.repo.get_workflow_runs(event="push", head_sha=commit.sha)
+            if run.head_branch == head
         }
         return runs.get(max(runs, default=None))
 
     def find_repo_tag_artifact(self) -> None:
         assert self.tag is not None
-        if (tag_run := self.repo_tag_last_run(self.tag)) is None:
+        if (tag_run := self.repo_commit_last_run(self.tag.commit, self.tag.name)) is None:
             msg = f"{self.name}: no workflow run found for tag {self.tag.name}"
             raise RuntimeError(msg)
         run_state = cast("tuple[str, str | None]", (tag_run.status, tag_run.conclusion))
