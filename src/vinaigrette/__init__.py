@@ -181,7 +181,7 @@ def main() -> None:
     branch = "unstable" if args.unstable else cast("str", args.branch)
     debian_rel = cast("str", args.debian)
 
-    gh = github.Github(auth=github.Auth.Token(args.github_token))
+    gh = github.Github(auth=github.Auth.Token(args.github_token), per_page=100)
 
     config = get_config()
     org = gh.get_organization(config.projects.organization)
