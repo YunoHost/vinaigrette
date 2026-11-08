@@ -133,7 +133,7 @@ class Project:
 
 
 def set_logging_level(level: int) -> None:
-    levels = [logging.WARNING, logging.INFO, logging.DEBUG]
+    levels = [logging.INFO, logging.DEBUG]
     level = max(0, min(level, len(levels) - 1))
     logfmt = "%(log_color)s%(asctime)s %(levelname)-8s %(message)s"
     handler = logging.StreamHandler()
