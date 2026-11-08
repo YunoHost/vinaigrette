@@ -149,6 +149,7 @@ def main() -> None:
     parser.add_argument("-p", "--project", type=str, help="Project to handle, all if not specified")
     parser.add_argument("-t", "--tag", type=str, help="Git tag to use, for a single project")
     parser.add_argument("-r", "--repository", type=Path, help="Path to the Debian repository")
+    parser.add_argument("-y", "--yes", type=str, help="Reply yes to all questions")
     parser.add_argument("-w", "--workdir", type=Path, required=True, help="Work directory (to extract the artifacts)")
     args = parser.parse_args()
     set_logging_level(args.verbose)
@@ -173,6 +174,16 @@ def main() -> None:
         if args.tag:
             project.repo_set_tag(args.tag)
         project.find_repo_tag_artifact(config.projects.version_re)
+
+    if not args.yes:
+        while True:
+            match input("OK to download and distribute found packages?").lower():
+                case "y" | "yes":
+                    break
+                case "n" | "no":
+                    raise SystemExit(0)
+                case _ as e:
+                    print(f"Invalid choice: '{e}'")
 
     for project in projects:
         project.download_artifact(workdir)
