@@ -49,6 +49,7 @@ class Project:
             run.run_number: run
             for run in self.repo.get_workflow_runs(event="push", head_sha=commit.sha)
             if run.head_branch == head
+            and "build.yml" in run.path
         }
         return runs.get(max(runs, default=None))
 
@@ -77,7 +78,7 @@ class Project:
                 self.ci_run = run
                 return
             logging.warning(f"{self.name}: Branch {branch_name} commit {commit.sha} was skipped: {msg}")
-            if it >= 10:
+            if it >= 2:
                 raise RuntimeError(f"{self.name}: Could not find a commit with a valid CI run!")
 
     def ci_run_is_valid(self, run: github.WorkflowRun.WorkflowRun) -> str | None:
