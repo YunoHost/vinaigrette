@@ -146,6 +146,21 @@ class Project:
         subprocess.check_call(cmd)
 
 
+def confirm(message: str, *, skip: bool = False) -> bool:
+    message = message.rstrip() + " "
+    if skip:
+        print(f"{message}-> Skipped by --yes")
+        return True
+    while True:
+        match input(message).lower():
+            case "y" | "yes":
+                return True
+            case "n" | "no":
+                return False
+            case _ as e:
+                print(f"Invalid choice: '{e}'")
+
+
 def set_logging_level(level: int) -> None:
     levels = [logging.INFO, logging.DEBUG]
     level = max(0, min(level, len(levels) - 1))
@@ -196,18 +211,14 @@ def main() -> None:
             project.find_repo_tag_last_run(config.debians[debian_rel].version_re, tag_name=args.tag)
         project.find_repo_tag_artifact()
 
-    if not args.yes:
-        while True:
-            match input("OK to download and distribute found packages?").lower():
-                case "y" | "yes":
-                    break
-                case "n" | "no":
-                    raise SystemExit(0)
-                case _ as e:
-                    print(f"Invalid choice: '{e}'")
+    if not confirm("OK to download found packages?", skip=args.yes):
+        raise SystemExit(0)
 
     for project in projects:
         project.download_artifact(workdir)
+
+    if not confirm("OK to distribute found packages?", skip=args.yes):
+        raise SystemExit(0)
 
     if repository:
         for project in projects:
