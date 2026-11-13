@@ -16,9 +16,9 @@ external_projects = [
 
 [debians]
 [debians.bookworm]
-version_re = "^debian/12\\.(.*)$"
+version_re = "^debian/(12\\..*)$"
 unstable_branch = "dev"
 
 [debians.trixie]
-version_re = "^debian/13\\.(.*)$"
+version_re = "^debian/(13\\..*)$"
 unstable_branch = "trixie"
