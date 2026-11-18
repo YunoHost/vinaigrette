@@ -74,9 +74,9 @@ setargs() {
 
 function yes_or_no {
     while true; do
-        read -p "$* [y/n]: " yn
+        read -rp "$* [y/n]: " yn
         case $yn in
-            [Yy]*) return 0  ;;  
+            [Yy]*) return 0  ;;
             [Nn]*) echo "Aborted" ; return  1 ;;
         esac
     done
@@ -91,9 +91,9 @@ validate_git_tag() {
     # "critical" is turned into "warn", and "return 1" is disabled
     if ! git_assert_tag_is_head "$repo" "$tag"; then
         warn "Tag $tag is not the HEAD of the branch :/"
-        read -p "Continue anyways? [y/N] " continue_tag_is_head
+        read -rp "Continue anyways? [y/N] " continue_tag_is_head
         case $continue_tag_is_head in
-            [Yy]*) info "Continuing" ;;  
+            [Yy]*) info "Continuing" ;;
             *) critical "Aborted" ; return  1 ;;
         esac
     fi
