@@ -31,7 +31,7 @@ build_package() {
         opts+=(--anything-failed-commands='%s')
     fi
     if [[ "$arch" != "all" ]]; then
-        opts=(--host "$arch")
+        opts+=(--host "$arch")
     fi
 
     # Actual build is running here!
