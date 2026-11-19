@@ -71,7 +71,7 @@ main() {
 
     local tmp_main_dir
     mkdir -p "$BUILDS_DIR"
-    tmp_main_dir="$(mktemp -d -p "$BUILDS_DIR/" --suffix="-unstable")"
+    tmp_main_dir="$(mktemp -d -p "$BUILDS_DIR/" --suffix="-$BRANCH")"
     trap 'rm -rf -- "'"$tmp_main_dir"'"' EXIT
 
     make_chroot "$DEBIAN_CODENAME"
@@ -91,10 +91,10 @@ main() {
     # Move the orig tarball one level up…
     mv "$tmp_dir/sources/"*.orig.* "$tmp_dir"
 
-    build_package_all_archs "$tmp_dir" "$DEBIAN_CODENAME" "$PACKAGE" "$version" "unstable"
+    build_package_all_archs "$tmp_dir" "$DEBIAN_CODENAME" "$PACKAGE" "$version" "$BRANCH"
 
     package_source_name="$(debian_source "$tmp_dir/sources")"
-    distribute_package_all_archs "$REPO_DIR" "$tmp_dir" "$DEBIAN_CODENAME" "$PACKAGE" "$package_source_name" "$version" "unstable"
+    distribute_package_all_archs "$REPO_DIR" "$tmp_dir" "$DEBIAN_CODENAME" "$PACKAGE" "$package_source_name" "$version" "$BRANCH"
 
     debian_changelog_revert "$repo"
 }
